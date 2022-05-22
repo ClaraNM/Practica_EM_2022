@@ -5,5 +5,5 @@ using Unity.Netcode;
 
 public class GameManager : MonoBehaviour
 {
-
+    //Crear aqui lo del server
 }

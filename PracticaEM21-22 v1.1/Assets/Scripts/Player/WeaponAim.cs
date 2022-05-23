@@ -73,8 +73,19 @@ public class WeaponAim : NetworkBehaviour
 
         var crossHairPosition = new Vector3(x, y, 0);
         crossHair.transform.position = crossHairPosition;
+        UpdateCrosshairServerRpc(crossHairPosition);
     }
 
     #endregion
+    #region RPC
+    [ServerRpc]
+    void UpdateCrosshairServerRpc(Vector3 crossHairPosition)
+    {
+        crossHair.transform.position = crossHairPosition;
+    }
+    [ServerRpc]
+    void UpdateWeaponOrientationServerRpc() {
 
+    }
+    #endregion
 }

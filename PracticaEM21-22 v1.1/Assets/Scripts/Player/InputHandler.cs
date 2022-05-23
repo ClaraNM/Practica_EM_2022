@@ -64,7 +64,7 @@ public class InputHandler : NetworkBehaviour
 
     private void Update()
     {
-        if (IsLocalPlayer)
+        if (IsLocalPlayer && IsOwner)
         {
             CachedMoveInput = _move.ReadValue<Vector2>();
             var mousePosition = _mousePosition.ReadValue<Vector2>();

@@ -10,18 +10,21 @@ public class Player : NetworkBehaviour
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
     public NetworkVariable<PlayerState> State;
-
+    
     #endregion
 
     #region Unity Event Functions
 
     private void Awake()
     {
-        NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
-
+        // NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
+        //ConfigurePlayer(this.OwnerClientId);
         State = new NetworkVariable<PlayerState>();
     }
-
+    private void Start()
+    {
+        ConfigurePlayer(this.OwnerClientId);
+    }
     private void OnEnable()
     {
         // https://docs-multiplayer.unity3d.com/netcode/current/api/Unity.Netcode.NetworkVariable-1.OnValueChangedDelegate
@@ -42,6 +45,7 @@ public class Player : NetworkBehaviour
     {
         if (IsLocalPlayer)
         {
+            Debug.Log("Entra en ConfigurePlayer");
             ConfigurePlayer();
             ConfigureCamera();
             ConfigureControls();

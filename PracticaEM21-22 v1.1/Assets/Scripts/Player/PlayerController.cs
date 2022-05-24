@@ -30,6 +30,7 @@ public class PlayerController : NetworkBehaviour
     SpriteRenderer spriteRenderer;
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
+    NetworkVariable<Vector2> vel;
     NetworkVariable<bool> FlipSprite;
 
     #endregion
@@ -45,6 +46,7 @@ public class PlayerController : NetworkBehaviour
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
+        vel = new NetworkVariable<Vector2>();
         FlipSprite = new NetworkVariable<bool>();
     }
 
@@ -114,12 +116,70 @@ public class PlayerController : NetworkBehaviour
         {
             anim.SetBool("isGrounded", false);
         }
+      //  UpdateAnimatorStateClientRpc(anim.GetBool("isGrounded"), anim.GetBool("isJumping"));
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/serverrpc
     [ServerRpc]
     void PerformJumpServerRpc()
     {
+        if (IsServer)
+        {
+           // PerformJumpClientRpc(player.State.Value);
+            if (player.State.Value == PlayerState.Grounded)
+            {
+                _jumpsLeft = maxJumps;
+            }
+            else if (_jumpsLeft == 0)
+            {
+                return;
+            }
+            
+            player.State.Value = PlayerState.Jumping;
+            anim.SetBool("isJumping", true);
+            rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
+            
+            _jumpsLeft--;
+
+        }
+        
+    }
+
+    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/serverrpc
+    [ServerRpc]
+    void UpdatePlayerPositionServerRpc(Vector2 input)
+    {
+        if (IsServer)
+        {
+            //var playerState = player.State.Value;
+            //var vel = rb.velocity;
+            if (IsGrounded)
+            {
+                player.State.Value = PlayerState.Grounded;
+            }
+
+            if ((player.State.Value != PlayerState.Hooked))
+            {
+                rb.velocity = new Vector2(input.x * speed, rb.velocity.y);
+              //  UpdatePlayerPositionClientRpc(player.State.Value, input);
+            }
+        }
+        
+
+    }
+   [ClientRpc]
+    void UpdateAnimatorStateClientRpc(bool is_Grounded, bool is_Jumping)
+    {
+
+        anim.SetBool("isJumping", is_Grounded);
+        anim.SetBool("isGrounded", is_Jumping);
+    }
+    [ClientRpc]
+    void PerformJumpClientRpc(PlayerState value)
+    {
+        var player_ = player;
+        player_.State.Value = value;
+        var rb_ = rb;
         if (player.State.Value == PlayerState.Grounded)
         {
             _jumpsLeft = maxJumps;
@@ -129,41 +189,24 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        player.State.Value = PlayerState.Jumping;
+        player_.State.Value = PlayerState.Jumping;
         anim.SetBool("isJumping", true);
-        rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
+        rb_.velocity = new Vector2(rb.velocity.x, jumpHeight);
         _jumpsLeft--;
     }
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/serverrpc
-    [ServerRpc]
-    void UpdatePlayerPositionServerRpc(Vector2 input)
+    [ClientRpc]
+    void UpdatePlayerPositionClientRpc(PlayerState value, Vector2 input)
     {
-        if (IsGrounded)
+        var player_ = player;
+        player_.State.Value = value;
+        var rb_ = rb;
+
+        if ((value != PlayerState.Hooked))
         {
-            player.State.Value = PlayerState.Grounded;
+            rb_.velocity = new Vector2(input.x * speed, rb.velocity.y);
         }
-
-        if ((player.State.Value != PlayerState.Hooked))
-        {
-            rb.velocity = new Vector2(input.x * speed, rb.velocity.y);
-        }
+        
     }
-   /* [ServerRpc]
-    void UpdateMousePositionServerRpc(Vector2 mouse_pos)
-    {
-
-    }
-    [ServerRpc]
-    void PerformHookServerRpc(Vector2 input)
-    {
-
-    }
-    [ServerRpc]
-    void UpdateHookVisualServerRpc(Vector2 rope)
-    {
-
-    }*/
     #endregion
 
     #endregion
@@ -188,7 +231,7 @@ public class PlayerController : NetworkBehaviour
     }
 
     bool IsGrounded => collider.IsTouching(filter);
-
+     
     #endregion
 
 }

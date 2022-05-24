@@ -30,7 +30,6 @@ public class PlayerController : NetworkBehaviour
     SpriteRenderer spriteRenderer;
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
-    NetworkVariable<Vector2> vel;
     NetworkVariable<bool> FlipSprite;
 
     #endregion
@@ -46,7 +45,6 @@ public class PlayerController : NetworkBehaviour
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        vel = new NetworkVariable<Vector2>();
         FlipSprite = new NetworkVariable<bool>();
     }
 

@@ -23,12 +23,12 @@ public class WeaponAim : NetworkBehaviour
 
     private void OnEnable()
     {
-        handler.OnMousePosition.AddListener(UpdateCrosshairPositionServerRpc);
+        handler.OnMousePosition.AddListener(UpdateCrosshairPosition);
     }
 
     private void OnDisable()
     {
-        handler.OnMousePosition.RemoveListener(UpdateCrosshairPositionServerRpc);
+        handler.OnMousePosition.RemoveListener(UpdateCrosshairPosition);
     }
     
 
@@ -36,8 +36,7 @@ public class WeaponAim : NetworkBehaviour
 
     #region Methods
 
-    [ServerRpc]
-    void UpdateCrosshairPositionServerRpc(Vector2 input)
+    void UpdateCrosshairPosition(Vector2 input)
     {
 
         // https://docs.unity3d.com/2020.3/Documentation/ScriptReference/Camera.ScreenToWorldPoint.html
@@ -49,13 +48,13 @@ public class WeaponAim : NetworkBehaviour
             aimAngle = Mathf.PI * 2 + aimAngle;
         }
 
-        SetCrossHairPosition(aimAngle);
+        SetCrossHairPositionServerRpc(aimAngle);
 
-        UpdateWeaponOrientation();
+        UpdateWeaponOrientationServerRpc();
 
     }
-
-    void UpdateWeaponOrientation()
+    [ServerRpc]
+    void UpdateWeaponOrientationServerRpc()
     {
         weapon.right = crossHair.position - weapon.position;
 
@@ -69,7 +68,8 @@ public class WeaponAim : NetworkBehaviour
         }
     }
 
-    void SetCrossHairPosition(float aimAngle)
+    [ServerRpc]
+    void SetCrossHairPositionServerRpc(float aimAngle)
     {
         var x = transform.position.x + .5f * Mathf.Cos(aimAngle);
         var y = transform.position.y + .5f * Mathf.Sin(aimAngle);
@@ -80,16 +80,5 @@ public class WeaponAim : NetworkBehaviour
     }
 
     #endregion
-    #region RPC
-    
-    [ClientRpc]
-    void UpdateCrosshairClientRpc(Vector3 crossHairPosition)
-    {
-        crossHair.transform.position = crossHairPosition;
-    }
-    [ClientRpc]
-    void UpdateWeaponOrientationClientRpc() {
 
-    }
-    #endregion
 }

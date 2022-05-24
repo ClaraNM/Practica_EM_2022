@@ -10,7 +10,6 @@ public class GrapplingHook : NetworkBehaviour
     DistanceJoint2D rope;
     // // https://docs.unity3d.com/2020.3/Documentation/ScriptReference/LineRenderer.html
     LineRenderer ropeRenderer;
-    public bool seVeCuerda;
     Transform playerTransform;
     [SerializeField] Material material;
     // https://docs.unity3d.com/2020.3/Documentation/ScriptReference/LayerMask.html
@@ -173,7 +172,6 @@ public class GrapplingHook : NetworkBehaviour
     {
         rope.enabled = true;
         ropeRenderer.enabled = true;
-        seVeCuerda = true;
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
@@ -207,7 +205,6 @@ public class GrapplingHook : NetworkBehaviour
     {
         rope.enabled = true;
         ropeRenderer.enabled = true;
-        seVeCuerda = true;
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc

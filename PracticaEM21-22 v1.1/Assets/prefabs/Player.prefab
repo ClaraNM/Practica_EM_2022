@@ -378,7 +378,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02a463fa969cac149a1d07d91d5d36be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seVeCuerda: 0
   material: {fileID: 2100000, guid: c636fd2bad8a2a64490da5c38c70d6fa, type: 2}
 --- !u!114 &3112279240633773370
 MonoBehaviour:
@@ -462,7 +461,7 @@ Rigidbody2D:
   m_AngularDrag: 0
   m_GravityScale: 1
   m_Material: {fileID: 0}
-  m_Interpolate: 1
+  m_Interpolate: 2
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4

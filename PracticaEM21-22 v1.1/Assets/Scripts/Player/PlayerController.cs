@@ -15,7 +15,7 @@ public class PlayerController : NetworkBehaviour
     readonly float speed = 3.4f;
     readonly float jumpHeight = 6.5f;
     readonly float gravity = 1.5f;
-    readonly int maxJumps = 2;
+    readonly int maxExtraJumps = 1; //Aparte del salto primero
 
     LayerMask _layer;
     int _jumpsLeft;
@@ -35,7 +35,7 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
     #region Unity Event Functions
-
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -121,25 +121,24 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     void PerformJumpServerRpc()
     {
-        if (IsServer)
-        {
-           // PerformJumpClientRpc(player.State.Value);
-            if (player.State.Value == PlayerState.Grounded)
+        Debug.Log(_jumpsLeft);
+
+        // PerformJumpClientRpc(player.State.Value);
+        if (player.State.Value == PlayerState.Grounded)
             {
-                _jumpsLeft = maxJumps;
+                _jumpsLeft = maxExtraJumps;
             }
             else if (_jumpsLeft == 0)
             {
                 return;
             }
-            
             player.State.Value = PlayerState.Jumping;
             anim.SetBool("isJumping", true);
             rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
             
             _jumpsLeft--;
 
-        }
+        
         
     }
 
@@ -147,8 +146,7 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     void UpdatePlayerPositionServerRpc(Vector2 input)
     {
-        if (IsServer)
-        {
+        
             //var playerState = player.State.Value;
             //var vel = rb.velocity;
             if (IsGrounded)
@@ -161,7 +159,7 @@ public class PlayerController : NetworkBehaviour
                 rb.velocity = new Vector2(input.x * speed, rb.velocity.y);
               //  UpdatePlayerPositionClientRpc(player.State.Value, input);
             }
-        }
+        
         
 
     }
@@ -180,7 +178,7 @@ public class PlayerController : NetworkBehaviour
         var rb_ = rb;
         if (player.State.Value == PlayerState.Grounded)
         {
-            _jumpsLeft = maxJumps;
+            _jumpsLeft = maxExtraJumps;
         }
         else if (_jumpsLeft == 0)
         {

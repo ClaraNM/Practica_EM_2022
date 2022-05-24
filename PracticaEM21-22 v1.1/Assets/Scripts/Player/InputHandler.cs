@@ -89,6 +89,7 @@ public class InputHandler : NetworkBehaviour
     private void FixedUpdate()
     {
         MoveFixedUpdate(CachedMoveInput);
+
     }
 
     #endregion

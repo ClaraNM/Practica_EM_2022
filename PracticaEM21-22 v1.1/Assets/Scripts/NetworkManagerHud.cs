@@ -16,8 +16,7 @@ public class NetworkManagerHud : MonoBehaviour
 
     // This is needed to make the port field more convenient. GUILayout.TextField is very limited and we want to be able to clear the field entirely so we can't cache this as ushort.
     string m_PortString = "7777";
-    string m_ConnectAddress = "127.0.0.1";
-
+    string m_ConnectAddress = "127.0.0.1";  
     public Vector2 DrawOffset = new Vector2(10, 10);
 
     public Color LabelColor = Color.black;
@@ -55,11 +54,15 @@ public class NetworkManagerHud : MonoBehaviour
         GUILayout.Space(10);
         GUILayout.Label("Address", m_LabelTextStyle);
         GUILayout.Label("Port", m_LabelTextStyle);
-
+        
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
+        GUILayout.Space(10);
+        GUILayout.Label("Address", m_LabelTextStyle);
+        GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
         m_ConnectAddress = GUILayout.TextField(m_ConnectAddress);
         m_PortString = GUILayout.TextField(m_PortString);
         if (ushort.TryParse(m_PortString, out ushort port))

@@ -32,10 +32,10 @@ public class GameManager : MonoBehaviour
         if (networkManager.IsServer)
         {
 
-            int randomNumber = Random.Range(1, 10);
+            int randomNumber = Random.Range(1, 7);
             if (randomNumber == lastRespawn)
             {
-                randomNumber = Random.Range(0, 10);
+                randomNumber = Random.Range(1, 7);
             }
             lastRespawn = randomNumber;
             var player = Instantiate(prefab, respawns[randomNumber].transform);

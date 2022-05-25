@@ -114,6 +114,7 @@ public class PlayerController : NetworkBehaviour
         {
             anim.SetBool("isGrounded", false);
         }
+      //  UpdateAnimatorStateClientRpc(anim.GetBool("isGrounded"), anim.GetBool("isJumping"));
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/serverrpc
@@ -122,6 +123,7 @@ public class PlayerController : NetworkBehaviour
     {
         Debug.Log(_jumpsLeft);
 
+        // PerformJumpClientRpc(player.State.Value);
         if (player.State.Value == PlayerState.Grounded)
             {
                 _jumpsLeft = maxExtraJumps;
@@ -144,7 +146,9 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     void UpdatePlayerPositionServerRpc(Vector2 input)
     {
-
+        
+            //var playerState = player.State.Value;
+            //var vel = rb.velocity;
             if (IsGrounded)
             {
                 player.State.Value = PlayerState.Grounded;
@@ -152,18 +156,52 @@ public class PlayerController : NetworkBehaviour
 
             if ((player.State.Value != PlayerState.Hooked))
             {
-                rb.velocity = new Vector2(input.x * speed , rb.velocity.y);
-                UpdatePlayerPositionClientRpc(rb.velocity);
+                rb.velocity = new Vector2(input.x * speed, rb.velocity.y);
+              //  UpdatePlayerPositionClientRpc(player.State.Value, input);
             }
         
         
 
     }
-    [ClientRpc]
-    void UpdatePlayerPositionClientRpc(Vector2 velocity)
+   [ClientRpc]
+    void UpdateAnimatorStateClientRpc(bool is_Grounded, bool is_Jumping)
     {
-         rb.velocity = Vector2.Lerp(rb.velocity,velocity,speed);
 
+        anim.SetBool("isJumping", is_Grounded);
+        anim.SetBool("isGrounded", is_Jumping);
+    }
+    [ClientRpc]
+    void PerformJumpClientRpc(PlayerState value)
+    {
+        var player_ = player;
+        player_.State.Value = value;
+        var rb_ = rb;
+        if (player.State.Value == PlayerState.Grounded)
+        {
+            _jumpsLeft = maxExtraJumps;
+        }
+        else if (_jumpsLeft == 0)
+        {
+            return;
+        }
+
+        player_.State.Value = PlayerState.Jumping;
+        anim.SetBool("isJumping", true);
+        rb_.velocity = new Vector2(rb.velocity.x, jumpHeight);
+        _jumpsLeft--;
+    }
+    [ClientRpc]
+    void UpdatePlayerPositionClientRpc(PlayerState value, Vector2 input)
+    {
+        var player_ = player;
+        player_.State.Value = value;
+        var rb_ = rb;
+
+        if ((value != PlayerState.Hooked))
+        {
+            rb_.velocity = new Vector2(input.x * speed, rb.velocity.y);
+        }
+        
     }
     #endregion
 

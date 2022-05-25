@@ -6,13 +6,11 @@ using Unity.Netcode;
 
 public class Player : NetworkBehaviour
 {
-   
     #region Variables
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
     public NetworkVariable<PlayerState> State;
-    private GameObject[] respawns;
-
+    
     #endregion
 
     #region Unity Event Functions
@@ -21,7 +19,6 @@ public class Player : NetworkBehaviour
     {
         // NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
         //ConfigurePlayer(this.OwnerClientId);
-        respawns = GameObject.FindGameObjectsWithTag("Respawn");
         State = new NetworkVariable<PlayerState>();
     }
     private void Start()
@@ -48,6 +45,7 @@ public class Player : NetworkBehaviour
     {
         if (IsLocalPlayer)
         {
+            Debug.Log("Entra en ConfigurePlayer");
             ConfigurePlayer();
             ConfigureCamera();
             ConfigureControls();
@@ -56,8 +54,6 @@ public class Player : NetworkBehaviour
 
     void ConfigurePlayer()
     {
-       
-       // PlayerRespawnPositionServerRpc();
         UpdatePlayerStateServerRpc(PlayerState.Grounded);
     }
 
@@ -87,12 +83,7 @@ public class Player : NetworkBehaviour
     {
         State.Value = state;
     }
-    [ServerRpc]
-    public void PlayerRespawnPositionServerRpc()
-    {
-        int randomNumber = Random.Range(1, 10);
-        transform.position = respawns[randomNumber].transform.position;
-    }
+
     #endregion
 
     #endregion

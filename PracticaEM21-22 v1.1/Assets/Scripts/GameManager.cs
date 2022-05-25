@@ -7,11 +7,9 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] NetworkManager networkManager;
     [SerializeField] GameObject prefab;
-    private GameObject[] respawns;
-    int lastRespawn;
+
     private void Awake()
     {
-        respawns = GameObject.FindGameObjectsWithTag("Respawn");
         networkManager.OnServerStarted += OnServerReady;
         networkManager.OnClientConnectedCallback += OnClientConnected;
     }
@@ -31,14 +29,7 @@ public class GameManager : MonoBehaviour
     {
         if (networkManager.IsServer)
         {
-
-            int randomNumber = Random.Range(1, 10);
-            if (randomNumber == lastRespawn)
-            {
-                randomNumber = Random.Range(0, 10);
-            }
-            lastRespawn = randomNumber;
-            var player = Instantiate(prefab, respawns[randomNumber].transform);
+            var player = Instantiate(prefab);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
         }
     }

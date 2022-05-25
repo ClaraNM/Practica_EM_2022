@@ -113,7 +113,6 @@ public class UIManager : MonoBehaviour
     private void StartClient()
     {
         var ip = inputFieldIP.text;
-
         if (!string.IsNullOrEmpty(ip))
         {
             transport.SetConnectionData(ip, port);

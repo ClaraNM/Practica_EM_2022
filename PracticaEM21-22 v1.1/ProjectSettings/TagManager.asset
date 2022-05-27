@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - CinemachineCam
+  - Platform
   layers:
   - Default
   - TransparentFX

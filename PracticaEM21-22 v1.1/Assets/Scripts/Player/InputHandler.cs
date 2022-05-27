@@ -71,7 +71,7 @@ public class InputHandler : NetworkBehaviour
 
             var hookPerformed = _hook.WasPerformedThisFrame();
             var jumpPerformed = _jump.WasPerformedThisFrame();
-
+            var firePerformed= _fire.WasPerformedThisFrame();
             Move(CachedMoveInput);
             MousePosition(mousePosition);
 
@@ -80,7 +80,7 @@ public class InputHandler : NetworkBehaviour
             if (hookPerformed) { Hook(screenPoint); }
 
             if (jumpPerformed) { Jump(); }
-            if (_fire.WasPerformedThisFrame()) { Fire(); }
+            if (firePerformed) { Fire(); }
 
             HookRender(CachedMoveInput);
         }

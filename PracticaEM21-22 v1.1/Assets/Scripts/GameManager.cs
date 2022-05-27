@@ -11,7 +11,10 @@ public class GameManager : MonoBehaviour
     int lastRespawn;
     private void Awake()
     {
+        //Busca los puntos de respawn que hay en el mapa
         respawns = GameObject.FindGameObjectsWithTag("Respawn");
+
+        //Observa si se ha iniciado el servidor o si se han conectado clientes
         networkManager.OnServerStarted += OnServerReady;
         networkManager.OnClientConnectedCallback += OnClientConnected;
     }
@@ -29,6 +32,7 @@ public class GameManager : MonoBehaviour
 
     private void OnClientConnected(ulong clientId)
     {
+        //si un cliente se conecta lo inicializa en uno de los puntos de spawn de manera aleatoria
         if (networkManager.IsServer)
         {
 

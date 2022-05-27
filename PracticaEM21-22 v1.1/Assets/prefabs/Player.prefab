@@ -427,7 +427,7 @@ MonoBehaviour:
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
   InLocalSpace: 0
-  Interpolate: 1
+  Interpolate: 0
 --- !u!1 &4552348502872110885
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,10 +670,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9e0566fabbfc494d948bb0e945889c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  crossHair: {fileID: 693612501}
   bulletSpawn: {fileID: 2314726197588362579}
-  weapon: {fileID: 2125255220}
   bulletPrefab: {fileID: 1605041296558164941, guid: 5038edbb597af1547bc492c139777a12, type: 3}
+  speed: 7
 --- !u!114 &8835148374866897493
 MonoBehaviour:
   m_ObjectHideFlags: 0

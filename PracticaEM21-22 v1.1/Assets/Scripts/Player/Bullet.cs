@@ -5,7 +5,7 @@ public class Bullet : NetworkBehaviour {
 
     #region Variables
 
-    public float speed;
+
     public ulong owner;
 
     #endregion
@@ -14,25 +14,29 @@ public class Bullet : NetworkBehaviour {
 
     private void OnTriggerEnter2D(Collider2D collision) {
 
-        //Si es el servidor, este comprueba si la bala ha colisionado con otro jugador
+        //Si es el servidor, este comprueba si la bala ha colisionado con otro jugador o con plataformas
 
         if (IsServer) {
 
-            var otherPlayer = collision.GetComponent<Player>();
-
-            if (otherPlayer != null) {
-
-                if (owner != otherPlayer.OwnerClientId) {
-
-                    //player.Damage();
-
-                }
+            if (collision.gameObject.tag == "Platform") {
+                DestruirBalas();
             }
+            else if (collision.gameObject.tag == "Player")
+            {
+                //Si la bala contacta con otro pj que no sea el propietario desaparece la bala y hace daño
+                if (owner != collision.GetComponent<Player>().OwnerClientId)
+                {
+                    DestruirBalas();
+                    //player.Damage();
+                }
+
+            }
+
+
+
 
         }
 
-        //Método que se encarga de eliminar las balas que han colisionado
-        DestruirBalas();
     }
 
 

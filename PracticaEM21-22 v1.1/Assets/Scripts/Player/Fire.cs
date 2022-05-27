@@ -7,15 +7,12 @@ public class Fire : NetworkBehaviour
 {
     #region Variables
 
-    [SerializeField] public Transform crossHair;
     [SerializeField] public Transform bulletSpawn;
-    [SerializeField] public Transform weapon;
     [SerializeField] public GameObject bulletPrefab;
-
+    public float speed;
 
     InputHandler handler;
     Player player;
-
     #endregion
 
     #region Unity Event Functions
@@ -27,12 +24,12 @@ public class Fire : NetworkBehaviour
 
     private void OnEnable()
     {
-        handler.OnFire.AddListener(CalculateDirectionRpc);
+        handler.OnFire.AddListener(FireBullet);
     }
 
     private void OnDisable()
     {
-        handler.OnFire.RemoveListener(CalculateDirectionRpc);
+        handler.OnFire.RemoveListener(FireBullet);
     }
 
     #endregion
@@ -42,29 +39,26 @@ public class Fire : NetworkBehaviour
     #region ServerRPC
 
     [ServerRpc]
-    void FireServerRpc(Vector2 dir)
+    void FireOnServerRpc(Vector2 bulletForce,Vector3 spawnPos)
     {
-        dir.Normalize();
+        //se instancia la bala dada una posicion de spawn y sin ninguna rotacion
+        GameObject bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity);
 
-        var position = weapon.transform.position;
+        //se le añade la fuerza
+        bullet.GetComponent<Rigidbody2D>().AddForce(bulletForce, ForceMode2D.Impulse);
 
-        var bullet = Instantiate(bulletPrefab,
-            position + new Vector3(dir.x, dir.y, 0) * 0.5f, Quaternion.identity);
-
-        bullet.GetComponent<Rigidbody2D>().velocity = dir * bullet.GetComponent<Bullet>().speed;
+        //se le añade un proprietario para luego usarlo en las colisiones
         bullet.GetComponent<Bullet>().owner = player.OwnerClientId;
-
-        bullet.GetComponent<NetworkObject>().Spawn(true);
+        bullet.GetComponent<NetworkObject>().Spawn();
     }
     #endregion
-
-    #endregion
-
-    #region Métodos
-    void CalculateDirectionRpc()
+    void FireBullet()
     {
-        var dir = bulletSpawn.transform.position - weapon.transform.position;
-        FireServerRpc(dir);
+        //se calcula la fuerza
+        var force = bulletSpawn.right * speed;
+        //se envia mensaje al servidor para que spawnee la bala
+        FireOnServerRpc(force, bulletSpawn.position);
     }
     #endregion
+
 }

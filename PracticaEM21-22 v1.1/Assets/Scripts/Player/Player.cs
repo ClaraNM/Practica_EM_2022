@@ -6,10 +6,12 @@ using Unity.Netcode;
 
 public class Player : NetworkBehaviour
 {
+   
     #region Variables
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
     public NetworkVariable<PlayerState> State;
+    private GameObject[] respawns;
 
     #endregion
 
@@ -17,11 +19,15 @@ public class Player : NetworkBehaviour
 
     private void Awake()
     {
-        NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
-
+        // NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
+        //ConfigurePlayer(this.OwnerClientId);
+        respawns = GameObject.FindGameObjectsWithTag("Respawn");
         State = new NetworkVariable<PlayerState>();
     }
-
+    private void Start()
+    {
+        ConfigurePlayer(this.OwnerClientId);
+    }
     private void OnEnable()
     {
         // https://docs-multiplayer.unity3d.com/netcode/current/api/Unity.Netcode.NetworkVariable-1.OnValueChangedDelegate
@@ -50,6 +56,8 @@ public class Player : NetworkBehaviour
 
     void ConfigurePlayer()
     {
+       
+       // PlayerRespawnPositionServerRpc();
         UpdatePlayerStateServerRpc(PlayerState.Grounded);
     }
 
@@ -79,7 +87,12 @@ public class Player : NetworkBehaviour
     {
         State.Value = state;
     }
-
+    [ServerRpc]
+    public void PlayerRespawnPositionServerRpc()
+    {
+        int randomNumber = Random.Range(1, 10);
+        transform.position = respawns[randomNumber].transform.position;
+    }
     #endregion
 
     #endregion

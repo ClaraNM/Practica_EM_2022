@@ -87,12 +87,14 @@ public class GrapplingHook : NetworkBehaviour
     {
         if (player.State.Value == PlayerState.Hooked)
         {
+          
             ClimbRope(input.y);
-            UpdateRopeClientRpc();
+            UpdateRope();
 
         }
         else if (player.State.Value == PlayerState.Grounded)
         {
+            RemoveRope();
             RemoveRopeClientRpc();
             rope.enabled = false;
             ropeRenderer.enabled = false;
@@ -103,6 +105,7 @@ public class GrapplingHook : NetworkBehaviour
     [ServerRpc]
     void JumpPerformedServerRpc()
     {
+        RemoveRope();
         RemoveRopeClientRpc();
         rope.enabled = false;
         ropeRenderer.enabled = false;
@@ -119,7 +122,7 @@ public class GrapplingHook : NetworkBehaviour
             var anchor = hit.centroid;
             rope.connectedAnchor = anchor;
             ropeRenderer.SetPosition(1, anchor);
-            UpdateAnchorClientRpc(hit.centroid);
+            UpdateAnchor(hit.centroid);
             player.State.Value = PlayerState.Hooked;
         }
     }
@@ -144,26 +147,61 @@ public class GrapplingHook : NetworkBehaviour
 
     #endregion
 
-    #region ClientRPC
+
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-    [ClientRpc]
+ //   [ClientRpc]
+    void UpdateAnchor(Vector2 anchor)
+    {
+        rope.connectedAnchor = anchor;
+        ShowRope();
+        ropeRenderer.SetPosition(1, anchor);
+        UpdateAnchorClientRpc(anchor);
+    }
+
+    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
+  //  [ClientRpc]
+    void UpdateRope()
+    {
+        ropeRenderer.SetPosition(0, playerTransform.position);
+        UpdateRopeClientRpc();
+    }
+
+    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
+   // [ClientRpc]
+    void ShowRope()
+    {
+        rope.enabled = true;
+        ropeRenderer.enabled = true;
+    }
+
+    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
+ //   [ClientRpc]
+    void RemoveRope()
+    {
+        rope.enabled = false;
+        ropeRenderer.enabled = false;
+    }
+
+    #region Client
+    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
+       [ClientRpc]
     void UpdateAnchorClientRpc(Vector2 anchor)
     {
         rope.connectedAnchor = anchor;
-        ShowRopeClientRpc();
+        ShowRope();
         ropeRenderer.SetPosition(1, anchor);
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-    [ClientRpc]
+     [ClientRpc]
     void UpdateRopeClientRpc()
     {
         ropeRenderer.SetPosition(0, playerTransform.position);
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-    [ClientRpc]
+     [ClientRpc]
     void ShowRopeClientRpc()
     {
         rope.enabled = true;
@@ -171,11 +209,10 @@ public class GrapplingHook : NetworkBehaviour
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-    [ClientRpc]
+       [ClientRpc]
     void RemoveRopeClientRpc()
     {
-        rope.enabled = false;
-        ropeRenderer.enabled = false;
+        RemoveRope();
     }
 
     #endregion

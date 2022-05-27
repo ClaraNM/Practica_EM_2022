@@ -15,7 +15,7 @@ public class PlayerController : NetworkBehaviour
     readonly float speed = 3.4f;
     readonly float jumpHeight = 6.5f;
     readonly float gravity = 1.5f;
-    readonly int maxExtraJumps = 1; //Aparte del salto primero
+    readonly int maxJumps = 2; 
 
     LayerMask _layer;
     int _jumpsLeft;
@@ -120,11 +120,9 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     void PerformJumpServerRpc()
     {
-        Debug.Log(_jumpsLeft);
-
         if (player.State.Value == PlayerState.Grounded)
             {
-                _jumpsLeft = maxExtraJumps;
+                _jumpsLeft = maxJumps;
             }
             else if (_jumpsLeft == 0)
             {
@@ -144,8 +142,9 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     void UpdatePlayerPositionServerRpc(Vector2 input)
     {
-
-            if (IsGrounded)
+        //Aparte de tener en cuenta si está tocando, que compruebe que esté cayendo o que no se esté moviendo en el eje y
+        //Por si se diera el caso en el que empieza a saltar y no se cambia a tiempo el estado de grounded a jumping
+            if (IsGrounded && rb.velocity.y <=0) 
             {
                 player.State.Value = PlayerState.Grounded;
             }
@@ -153,18 +152,12 @@ public class PlayerController : NetworkBehaviour
             if ((player.State.Value != PlayerState.Hooked))
             {
                 rb.velocity = new Vector2(input.x * speed , rb.velocity.y);
-                UpdatePlayerPositionClientRpc(rb.velocity);
             }
         
         
 
     }
-    [ClientRpc]
-    void UpdatePlayerPositionClientRpc(Vector2 velocity)
-    {
-         rb.velocity = Vector2.Lerp(rb.velocity,velocity,speed);
 
-    }
     #endregion
 
     #endregion

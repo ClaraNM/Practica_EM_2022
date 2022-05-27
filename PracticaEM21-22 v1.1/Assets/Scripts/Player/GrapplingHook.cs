@@ -89,12 +89,18 @@ public class GrapplingHook : NetworkBehaviour
         {
           
             ClimbRope(input.y);
-            UpdateRope();
 
+            //No se calcula el update de la cuerda solo en el cliente sino que se actualiza en el servidor para que tenga en cuenta los 
+            //efectos que provoca en el movimiento del jugador, ya que los lleva el servidor, y se actualiza también en el cliente para
+            //actualizar visualmente la cuerda.
+            UpdateRope(); 
         }
         else if (player.State.Value == PlayerState.Grounded)
         {
+            //Al igual que antes los cambios tienen que hacerse siempre sí o sí en el servidor
             RemoveRope();
+            //En este caso también se envía un mensaje al cliente para que visualmente en el cliente también desaparezca la cuerda,
+            //ya que no es un elemento con networkbehavior
             RemoveRopeClientRpc();
             rope.enabled = false;
             ropeRenderer.enabled = false;
@@ -147,43 +153,7 @@ public class GrapplingHook : NetworkBehaviour
 
     #endregion
 
-
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
- //   [ClientRpc]
-    void UpdateAnchor(Vector2 anchor)
-    {
-        rope.connectedAnchor = anchor;
-        ShowRope();
-        ropeRenderer.SetPosition(1, anchor);
-        UpdateAnchorClientRpc(anchor);
-    }
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-  //  [ClientRpc]
-    void UpdateRope()
-    {
-        ropeRenderer.SetPosition(0, playerTransform.position);
-        UpdateRopeClientRpc();
-    }
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-   // [ClientRpc]
-    void ShowRope()
-    {
-        rope.enabled = true;
-        ropeRenderer.enabled = true;
-    }
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
- //   [ClientRpc]
-    void RemoveRope()
-    {
-        rope.enabled = false;
-        ropeRenderer.enabled = false;
-    }
-
-    #region Client
+    #region ClientRPC
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
        [ClientRpc]
     void UpdateAnchorClientRpc(Vector2 anchor)
@@ -201,14 +171,6 @@ public class GrapplingHook : NetworkBehaviour
     }
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
-     [ClientRpc]
-    void ShowRopeClientRpc()
-    {
-        rope.enabled = true;
-        ropeRenderer.enabled = true;
-    }
-
-    // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/clientrpc
        [ClientRpc]
     void RemoveRopeClientRpc()
     {
@@ -221,6 +183,31 @@ public class GrapplingHook : NetworkBehaviour
 
     #region Methods
 
+
+    void UpdateAnchor(Vector2 anchor)
+    {
+        rope.connectedAnchor = anchor;
+        ShowRope();
+        ropeRenderer.SetPosition(1, anchor);
+        UpdateAnchorClientRpc(anchor);
+    }
+    void UpdateRope()
+    {
+        ropeRenderer.SetPosition(0, playerTransform.position);
+        UpdateRopeClientRpc();
+    }
+
+    void ShowRope()
+    {
+        rope.enabled = true;
+        ropeRenderer.enabled = true;
+    }
+
+    void RemoveRope()
+    {
+        rope.enabled = false;
+        ropeRenderer.enabled = false;
+    }
     void ClimbRope(float input)
     {
         ropeDistance.Value = (input) * climbSpeed * Time.deltaTime;
@@ -230,6 +217,7 @@ public class GrapplingHook : NetworkBehaviour
     {
         rope.distance -= current;
     }
+
 
     #endregion
 }

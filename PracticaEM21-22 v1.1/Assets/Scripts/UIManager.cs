@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
 
     [Header("In-Game HUD")]
     [SerializeField] private GameObject inGameHUD;
+
     [SerializeField] RawImage[] heartsUI = new RawImage[3];
 
     #endregion

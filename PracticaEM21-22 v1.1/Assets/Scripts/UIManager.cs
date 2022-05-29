@@ -161,8 +161,6 @@ public class UIManager : MonoBehaviour
     private void StartGame()
     {
        OnStartGame?.Invoke();
-        
-        ActivateInGameHUD();
     }
 
    public void setPlayerOnLobby(int idxPlayer, GameObject player)

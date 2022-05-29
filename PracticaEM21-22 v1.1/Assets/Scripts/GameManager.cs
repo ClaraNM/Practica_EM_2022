@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using Cinemachine;
 
 public class GameManager : NetworkBehaviour
 {
@@ -14,7 +15,7 @@ public class GameManager : NetworkBehaviour
     int lastRespawn;
     int maxPlayers=4;
     int minPlayers = 2;
-    Dictionary<ulong,GameObject> PlayersConnected = new Dictionary<ulong, GameObject>();
+    Dictionary<ulong,PlayerSettings> PlayersConnected = new Dictionary<ulong, PlayerSettings>();
     public NetworkVariable<int> currentPlayers = new NetworkVariable<int>();
     private void Awake()
     {
@@ -25,7 +26,7 @@ public class GameManager : NetworkBehaviour
         networkManager.OnServerStarted += OnServerReady;
         networkManager.OnClientConnectedCallback += OnClientConnected;
         networkManager.OnClientDisconnectCallback += OnClientDisconnected;
-        uiManager.OnStartGame.AddListener(SpawnPlayers);
+        uiManager.OnStartGame.AddListener(StartGameOnServerRpc);
         currentPlayers.OnValueChanged += OnStateChanged;
         canStart.Value = false;
     }
@@ -36,7 +37,7 @@ public class GameManager : NetworkBehaviour
         networkManager.OnClientConnectedCallback -= OnClientConnected;
         networkManager.OnClientDisconnectCallback -= OnClientDisconnected;
         currentPlayers.OnValueChanged -= OnStateChanged;
-        uiManager.OnStartGame.RemoveListener(SpawnPlayers);
+        uiManager.OnStartGame.RemoveListener(StartGameOnServerRpc);
 
 
     }
@@ -59,9 +60,8 @@ public class GameManager : NetworkBehaviour
                 randomNumber = Random.Range(1, 7);
             }
             lastRespawn = randomNumber;
-            var player = Instantiate(prefab, respawns[randomNumber].transform);
-            Debug.Log(clientId);
-            PlayersConnected.Add(clientId, player);
+            PlayerSettings playerSettings =new PlayerSettings("prueba",0,randomNumber,clientId);
+            PlayersConnected.Add(clientId, playerSettings);
             currentPlayers.Value++;
             UpdateLobbyOnClientRpc(currentPlayers.Value);
             // player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
@@ -101,14 +101,40 @@ public class GameManager : NetworkBehaviour
     }
     void SpawnPlayers()
     {
-        if (networkManager.IsServer)
-        {
-            foreach (var item in PlayersConnected)
-            {
-                var client_id = item.Key;
-                var gObject = item.Value;
-                gObject.GetComponent<NetworkObject>().SpawnAsPlayerObject(client_id);
-            }
-        }
+        StartGameOnServerRpc();
     }
+    [ServerRpc(RequireOwnership = false)]
+    void StartGameOnServerRpc()
+    {
+
+        foreach (var item in PlayersConnected)
+        {
+            var client_id = item.Key;
+            var plyrStt = item.Value;
+            var player = Instantiate(prefab, respawns[plyrStt.respawnID].transform);     
+            player.GetComponent<NetworkObject>().SpawnAsPlayerObject(client_id);
+        }
+        StartGameOnClientRpc();
+    }
+    [ClientRpc]
+    void StartGameOnClientRpc()
+    {
+        uiManager.ActivateInGameHUD();
+    }
+}
+ class PlayerSettings
+{
+    public string name;
+    public int skin;
+    public int respawnID;
+    public ulong clientID;
+
+   public PlayerSettings(string _name, int _skin, int _respawnID, ulong _clientID)
+    {
+        this.name = _name;
+        this.skin = _skin;
+        this.respawnID = _respawnID;
+        this.clientID = _clientID;
+    }
+    
 }

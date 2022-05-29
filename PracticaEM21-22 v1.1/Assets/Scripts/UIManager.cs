@@ -22,13 +22,27 @@ public class UIManager : MonoBehaviour
 
     [Header("Main Menu")]
     [SerializeField] private GameObject mainMenu;
-    [SerializeField] private Button buttonHost;
+  //  [SerializeField] private Button buttonHost;
     [SerializeField] private Button buttonClient;
     [SerializeField] private Button buttonServer;
-    [SerializeField] private InputField inputFieldIP;
+    [SerializeField] private Button buttonExit;
 
-    [Header("In-Game HUD")]
-    [SerializeField] private GameObject inGameHUD;
+    [Header("Selector Type HUD")]
+    [SerializeField] private GameObject SelectorTypeHUD;
+    [SerializeField] private InputField inputFieldNamePlayer;
+    [SerializeField] private InputField inputFieldServerIP;
+    [SerializeField] private Button buttonType;
+    [SerializeField] private Button buttonType2;
+    [SerializeField] private Button buttonType3;
+    [SerializeField] private Button buttonType4;
+    [SerializeField] private Button buttonPlay;
+    [SerializeField] private Button buttonBackSelector;
+
+    [Header("Server HUD")]
+    [SerializeField] private GameObject ServerHUD;
+    [SerializeField] private InputField inputFieldIP;
+    [SerializeField] private Button buttonServerPlay;
+    [SerializeField] private Button buttonBackServer;
 
     [Header("Lobby")]
     [SerializeField] private GameObject Lobby;
@@ -36,7 +50,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject player2;
     [SerializeField] private GameObject player3;
     [SerializeField] private GameObject player4;
-    [SerializeField] private GameObject buttonPlay;
+    [SerializeField] private GameObject buttonReady;
+
+
+    [Header("In-Game HUD")]
+    [SerializeField] private GameObject inGameHUD;
+
+
 
     [SerializeField] RawImage[] heartsUI = new RawImage[3];
 
@@ -51,10 +71,17 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        buttonHost.onClick.AddListener(() => StartHost());
-        buttonClient.onClick.AddListener(() => StartClient());
+        //buttonHost.onClick.AddListener(() => StartHost());
+       // buttonClient.onClick.AddListener(() => StartSelectorPlayer());
+        buttonServer.onClick.AddListener(() => StartServerIP());
+        buttonBackServer.onClick.AddListener(() => ActivateMainMenu());
+        buttonBackSelector.onClick.AddListener(() => ActivateMainMenu());
+        buttonExit.onClick.AddListener(() => StartExit());
+        buttonClient.onClick.AddListener(() => StartSelectorPlayer());
         buttonServer.onClick.AddListener(() => StartServer());
-        buttonPlay.GetComponent<Button>().onClick.AddListener(() => StartGame());
+        buttonPlay.onClick.AddListener(() =>ActivateLobby());
+        buttonPlay.onClick.AddListener(() => StartClient());
+        buttonReady.GetComponent<Button>().onClick.AddListener(() => StartGame());
         ActivateMainMenu();
     }
 
@@ -66,24 +93,49 @@ public class UIManager : MonoBehaviour
     {
         mainMenu.SetActive(true);
         inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
         Lobby.SetActive(false);
     }
+    private void ActivateClient()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(true);
+        ServerHUD.SetActive(false);
+    }
 
+    private void ActivateServer()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(true);
+    }
     public void ActivateInGameHUD()
     {
         mainMenu.SetActive(false);
         Lobby.SetActive(false);
         inGameHUD.SetActive(true);
-
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
+    }
+    private void ActivateModeViewer()
+    {
+        mainMenu.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+        inGameHUD.SetActive(false);
     }
     private void ActivateLobby()
     {
         mainMenu.SetActive(false);
         Lobby.SetActive(true);
         inGameHUD.SetActive(false);
-
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
     }
@@ -129,7 +181,6 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
-
     #endregion
 
     #region Netcode Related Methods
@@ -139,25 +190,33 @@ public class UIManager : MonoBehaviour
         NetworkManager.Singleton.StartHost();
         ActivateInGameHUD();
     }
+    private void StartSelectorPlayer()
+    {
+        ActivateClient();
+    }
 
     private void StartClient()
     {
-       // var ip = inputFieldIP.text;
-        var ip = "127.0.0.1";
+       var ip = inputFieldIP.text;
         if (!string.IsNullOrEmpty(ip))
         {
             transport.SetConnectionData(ip, port);
         }
         NetworkManager.Singleton.StartClient();
         //ActivateInGameHUD();
-        ActivateLobby();
+        //StartSelectorPlayer();
+    }
+    private void StartServerIP()
+    {
+        ActivateServer();
     }
 
     private void StartServer()
     {
         NetworkManager.Singleton.StartServer();
-        ActivateInGameHUD();
+        ActivateModeViewer();
     }
+    private void StartExit() { Application.Quit(); }
     private void StartGame()
     {
        OnStartGame?.Invoke();
@@ -200,7 +259,7 @@ public class UIManager : MonoBehaviour
     }
     public void activatePlay()
     {
-        buttonPlay.SetActive(true);
+        buttonReady.SetActive(true);
     }
     #endregion
 

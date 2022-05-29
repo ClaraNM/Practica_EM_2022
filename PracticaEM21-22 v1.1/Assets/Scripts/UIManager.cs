@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using UnityEngine.Events;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class UIManager : MonoBehaviour
     #region Variables
 
     public static UIManager Instance;
+    public UnityEvent OnStartGame;
 
     [SerializeField] NetworkManager networkManager;
     UnityTransport transport;
@@ -20,7 +22,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Main Menu")]
     [SerializeField] private GameObject mainMenu;
-    //[SerializeField] private Button buttonHost;
+  //  [SerializeField] private Button buttonHost;
     [SerializeField] private Button buttonClient;
     [SerializeField] private Button buttonServer;
     [SerializeField] private Button buttonExit;
@@ -42,8 +44,20 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button buttonServerPlay;
     [SerializeField] private Button buttonBackServer;
 
+    [Header("Lobby")]
+    [SerializeField] private GameObject Lobby;
+    [SerializeField] private GameObject player1;
+    [SerializeField] private GameObject player2;
+    [SerializeField] private GameObject player3;
+    [SerializeField] private GameObject player4;
+    [SerializeField] private GameObject buttonReady;
+
+
     [Header("In-Game HUD")]
     [SerializeField] private GameObject inGameHUD;
+
+
+
     [SerializeField] RawImage[] heartsUI = new RawImage[3];
 
     #endregion
@@ -53,19 +67,21 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         transport = (UnityTransport)networkManager.NetworkConfig.NetworkTransport;
-        Instance = this;
     }
 
     private void Start()
     {
         //buttonHost.onClick.AddListener(() => StartHost());
-        buttonClient.onClick.AddListener(() => StartSelectorPlayer());
+       // buttonClient.onClick.AddListener(() => StartSelectorPlayer());
         buttonServer.onClick.AddListener(() => StartServerIP());
         buttonBackServer.onClick.AddListener(() => ActivateMainMenu());
         buttonBackSelector.onClick.AddListener(() => ActivateMainMenu());
         buttonExit.onClick.AddListener(() => StartExit());
+        buttonClient.onClick.AddListener(() => StartSelectorPlayer());
+        buttonServer.onClick.AddListener(() => StartServer());
+        buttonPlay.onClick.AddListener(() =>ActivateLobby());
         buttonPlay.onClick.AddListener(() => StartClient());
-        buttonServerPlay.onClick.AddListener(() => StartServer());
+        buttonReady.GetComponent<Button>().onClick.AddListener(() => StartGame());
         ActivateMainMenu();
     }
 
@@ -79,8 +95,8 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
+        Lobby.SetActive(false);
     }
-
     private void ActivateClient()
     {
         mainMenu.SetActive(false);
@@ -96,24 +112,32 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(true);
     }
-
-    private void ActivateInGameHUD()
+    public void ActivateInGameHUD()
     {
         mainMenu.SetActive(false);
+        Lobby.SetActive(false);
+        inGameHUD.SetActive(true);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
-        inGameHUD.SetActive(true);
-
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
     }
-
-    private void ActivateModeViewer() 
+    private void ActivateModeViewer()
     {
         mainMenu.SetActive(false);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
         inGameHUD.SetActive(false);
+    }
+    private void ActivateLobby()
+    {
+        mainMenu.SetActive(false);
+        Lobby.SetActive(true);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+        // for test purposes
+        //UpdateLifeUI(Random.Range(1, 6));
     }
 
     public void UpdateLifeUI(int hitpoints)
@@ -157,46 +181,86 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
-
     #endregion
 
     #region Netcode Related Methods
 
-    //private void StartHost()
-    //{
-    //    NetworkManager.Singleton.StartHost();
-    //    ActivateInGameHUD();
-    //}
-
+    private void StartHost()
+    {
+        NetworkManager.Singleton.StartHost();
+        ActivateInGameHUD();
+    }
     private void StartSelectorPlayer()
     {
         ActivateClient();
     }
 
-    private void StartClient() 
+    private void StartClient()
     {
-        var ip = inputFieldServerIP.text;
+       var ip = inputFieldIP.text;
         if (!string.IsNullOrEmpty(ip))
         {
             transport.SetConnectionData(ip, port);
         }
         NetworkManager.Singleton.StartClient();
-        ActivateInGameHUD();
+        //ActivateInGameHUD();
+        //StartSelectorPlayer();
     }
-
     private void StartServerIP()
     {
         ActivateServer();
     }
 
-    private void StartServer() 
+    private void StartServer()
     {
         NetworkManager.Singleton.StartServer();
         ActivateModeViewer();
     }
-
     private void StartExit() { Application.Quit(); }
+    private void StartGame()
+    {
+       OnStartGame?.Invoke();
+    }
 
+   public void setPlayerOnLobby(int idxPlayer, GameObject player)
+    {
+        Text name_Player = player.transform.GetChild(2).gameObject.transform.GetChild(0).GetComponent<Text>();
+        SpriteRenderer sprite_Player = player.GetComponent<SpriteRenderer>();
+
+        switch (idxPlayer-1)
+        {
+            case 0:
+                GameObject namePlayer = player1.transform.GetChild(0).gameObject;
+                GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
+                namePlayer.GetComponent<Text>().text = name_Player.text;
+                imagePlayer.GetComponent<Image>().sprite=sprite_Player.sprite;
+                break;
+            case 1:
+                GameObject namePlayer2 = player2.transform.GetChild(0).gameObject;
+                GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
+                namePlayer2.GetComponent<Text>().text = name_Player.text;
+                imagePlayer2.GetComponent<Image>().sprite = sprite_Player.sprite;
+                break;
+            case 2:
+                GameObject namePlayer3 = player3.transform.GetChild(0).gameObject;
+                GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
+                namePlayer3.GetComponent<Text>().text = name_Player.text;
+                imagePlayer3.GetComponent<Image>().sprite = sprite_Player.sprite;
+                break;
+            case 3:
+                GameObject namePlayer4 = player4.transform.GetChild(0).gameObject;
+                GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
+                namePlayer4.GetComponent<Text>().text = name_Player.text;
+                imagePlayer4.GetComponent<Image>().sprite = sprite_Player.sprite;
+                break;
+            default:
+                break;
+        }
+    }
+    public void activatePlay()
+    {
+        buttonReady.SetActive(true);
+    }
     #endregion
 
 }

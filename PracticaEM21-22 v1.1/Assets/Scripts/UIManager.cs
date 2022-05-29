@@ -20,10 +20,27 @@ public class UIManager : MonoBehaviour
 
     [Header("Main Menu")]
     [SerializeField] private GameObject mainMenu;
-    [SerializeField] private Button buttonHost;
+    //[SerializeField] private Button buttonHost;
     [SerializeField] private Button buttonClient;
     [SerializeField] private Button buttonServer;
+    [SerializeField] private Button buttonExit;
+
+    [Header("Selector Type HUD")]
+    [SerializeField] private GameObject SelectorTypeHUD;
+    [SerializeField] private InputField inputFieldNamePlayer;
+    [SerializeField] private InputField inputFieldServerIP;
+    [SerializeField] private Button buttonType;
+    [SerializeField] private Button buttonType2;
+    [SerializeField] private Button buttonType3;
+    [SerializeField] private Button buttonType4;
+    [SerializeField] private Button buttonPlay;
+    [SerializeField] private Button buttonBackSelector;
+
+    [Header("Server HUD")]
+    [SerializeField] private GameObject ServerHUD;
     [SerializeField] private InputField inputFieldIP;
+    [SerializeField] private Button buttonServerPlay;
+    [SerializeField] private Button buttonBackServer;
 
     [Header("In-Game HUD")]
     [SerializeField] private GameObject inGameHUD;
@@ -41,9 +58,14 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        buttonHost.onClick.AddListener(() => StartHost());
-        buttonClient.onClick.AddListener(() => StartClient());
-        buttonServer.onClick.AddListener(() => StartServer());
+        //buttonHost.onClick.AddListener(() => StartHost());
+        buttonClient.onClick.AddListener(() => StartSelectorPlayer());
+        buttonServer.onClick.AddListener(() => StartServerIP());
+        buttonBackServer.onClick.AddListener(() => ActivateMainMenu());
+        buttonBackSelector.onClick.AddListener(() => ActivateMainMenu());
+        buttonExit.onClick.AddListener(() => StartExit());
+        buttonPlay.onClick.AddListener(() => StartClient());
+        buttonServerPlay.onClick.AddListener(() => StartServer());
         ActivateMainMenu();
     }
 
@@ -55,15 +77,43 @@ public class UIManager : MonoBehaviour
     {
         mainMenu.SetActive(true);
         inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+    }
+
+    private void ActivateClient()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(true);
+        ServerHUD.SetActive(false);
+    }
+
+    private void ActivateServer()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(true);
     }
 
     private void ActivateInGameHUD()
     {
         mainMenu.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
         inGameHUD.SetActive(true);
 
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
+    }
+
+    private void ActivateModeViewer() 
+    {
+        mainMenu.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+        inGameHUD.SetActive(false);
     }
 
     public void UpdateLifeUI(int hitpoints)
@@ -112,15 +162,20 @@ public class UIManager : MonoBehaviour
 
     #region Netcode Related Methods
 
-    private void StartHost()
+    //private void StartHost()
+    //{
+    //    NetworkManager.Singleton.StartHost();
+    //    ActivateInGameHUD();
+    //}
+
+    private void StartSelectorPlayer()
     {
-        NetworkManager.Singleton.StartHost();
-        ActivateInGameHUD();
+        ActivateClient();
     }
 
-    private void StartClient()
+    private void StartClient() 
     {
-        var ip = inputFieldIP.text;
+        var ip = inputFieldServerIP.text;
         if (!string.IsNullOrEmpty(ip))
         {
             transport.SetConnectionData(ip, port);
@@ -129,11 +184,18 @@ public class UIManager : MonoBehaviour
         ActivateInGameHUD();
     }
 
-    private void StartServer()
+    private void StartServerIP()
+    {
+        ActivateServer();
+    }
+
+    private void StartServer() 
     {
         NetworkManager.Singleton.StartServer();
-        ActivateInGameHUD();
+        ActivateModeViewer();
     }
+
+    private void StartExit() { Application.Quit(); }
 
     #endregion
 

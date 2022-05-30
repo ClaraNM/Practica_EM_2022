@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using Unity.Netcode;
+using Unity.Collections; //Para poder utilizar FixedString64Bytes, ya que networkVariable no permite usar string
+using UnityEngine.UI; // Para poder usar String de la UI
 
 public class Player : NetworkBehaviour
 {
@@ -11,6 +13,8 @@ public class Player : NetworkBehaviour
 
     // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable
     public NetworkVariable<PlayerState> State;
+    public NetworkVariable<FixedString32Bytes> Nombre; //Variable compartida del nombre del personaje.
+    public Text textoEnCabeza; // Variable para conectar con el asset. En Unity enlazar el texto de la cabeza del personaje con esta variable.
     private GameObject[] respawns;
 
 
@@ -32,6 +36,7 @@ public class Player : NetworkBehaviour
         //ConfigurePlayer(this.OwnerClientId);
         respawns = GameObject.FindGameObjectsWithTag("Respawn");
         State = new NetworkVariable<PlayerState>();
+        Nombre = new NetworkVariable<FixedString32Bytes>(); //Inicializamos el nombre
 
 
         //Vida
@@ -49,6 +54,8 @@ public class Player : NetworkBehaviour
 
         //Actualización de la vida
         Vidas.OnValueChanged += UpdateLives;
+
+        Nombre.OnValueChanged += OnPlayerNombreValueChanged; //
     }
 
     private void OnDisable()
@@ -57,6 +64,8 @@ public class Player : NetworkBehaviour
         State.OnValueChanged -= OnPlayerStateValueChanged;
 
         Vidas.OnValueChanged -= UpdateLives;
+
+        Nombre.OnValueChanged -= OnPlayerNombreValueChanged; //
     }
 
     #endregion
@@ -72,6 +81,13 @@ public class Player : NetworkBehaviour
             ConfigureControls();
             UIManager.Instance.UpdateLifeUI(NumHealth - Vidas.Value);
         }
+        string thisName = UIManager.Instance.inputFieldNamePlayer.text.ToString(); //Recogemos el nombre de la UI
+        if (thisName.Length == 0) //Si en la UI no han puesto nombre, le llamamos "Jugador [ID del cliente]"
+        {
+            thisName = $"Jugador {this.OwnerClientId}";
+        }
+        UpdatePlayerNameServerRpc(thisName); // hacer metodo antes de esto para comprobar que no esta vacio
+        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
     }
 
     void ConfigurePlayer()
@@ -113,6 +129,12 @@ public class Player : NetworkBehaviour
         int randomNumber = Random.Range(1, 10);
         transform.position = respawns[randomNumber].transform.position;
     }
+    [ServerRpc]
+    public void UpdatePlayerNameServerRpc(FixedString32Bytes nombreActual) //
+    {
+        Nombre.Value = nombreActual; //
+        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
+    }
     #endregion
 
     #endregion
@@ -123,6 +145,12 @@ public class Player : NetworkBehaviour
     void OnPlayerStateValueChanged(PlayerState previous, PlayerState current)
     {
         State.Value = current;
+    }
+
+    void OnPlayerNombreValueChanged(FixedString32Bytes previous, FixedString32Bytes current) //
+    {
+        Nombre.Value = current; //
+        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
     }
 
 

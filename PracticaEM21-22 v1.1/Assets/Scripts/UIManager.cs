@@ -29,7 +29,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Selector Type HUD")]
     [SerializeField] private GameObject SelectorTypeHUD;
-    [SerializeField] private InputField inputFieldNamePlayer;
+    [SerializeField] public InputField inputFieldNamePlayer; //
     [SerializeField] private InputField inputFieldServerIP;
     [SerializeField] private Button buttonType;
     [SerializeField] private Button buttonType2;

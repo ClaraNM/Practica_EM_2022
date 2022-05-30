@@ -51,7 +51,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject player3;
     [SerializeField] private GameObject player4;
     [SerializeField] private GameObject buttonReady;
+    [SerializeField] private Button buttonExitLobby;
 
+    [Header("Lobby Full Warning")]
+    [SerializeField] private GameObject LobbyFull;
+    [SerializeField] private Button buttonCloseWarning;
 
     [Header("In-Game HUD")]
     [SerializeField] private GameObject inGameHUD;
@@ -81,6 +85,9 @@ public class UIManager : MonoBehaviour
         buttonServer.onClick.AddListener(() => StartServer());
         buttonPlay.onClick.AddListener(() =>ActivateLobby());
         buttonPlay.onClick.AddListener(() => StartClient());
+        buttonExitLobby.onClick.AddListener(() => StartSelectorPlayer());
+        buttonExitLobby.onClick.AddListener(() => DisconectClient());
+        buttonCloseWarning.onClick.AddListener(() => CloseWarning());
         buttonReady.GetComponent<Button>().onClick.AddListener(() => StartGame());
         ActivateMainMenu();
     }
@@ -96,6 +103,8 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
         Lobby.SetActive(false);
+        LobbyFull.SetActive(false);
+
     }
     private void ActivateClient()
     {
@@ -103,6 +112,9 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(true);
         ServerHUD.SetActive(false);
+        LobbyFull.SetActive(false);
+        Lobby.SetActive(false);
+
     }
 
     private void ActivateServer()
@@ -111,6 +123,10 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(true);
+        LobbyFull.SetActive(false);
+
+        Lobby.SetActive(false);
+
     }
     public void ActivateInGameHUD()
     {
@@ -119,6 +135,8 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(true);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
+        LobbyFull.SetActive(false);
+
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
     }
@@ -128,6 +146,10 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
         inGameHUD.SetActive(false);
+        Lobby.SetActive(false);
+        LobbyFull.SetActive(false);
+
+
     }
     private void ActivateLobby()
     {
@@ -136,10 +158,26 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
-        // for test purposes
-        //UpdateLifeUI(Random.Range(1, 6));
-    }
+        LobbyFull.SetActive(false);
 
+    }
+    public void ActivateLobbyFullWarning()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(true);
+        ServerHUD.SetActive(false);
+        Lobby.SetActive(false);
+        LobbyFull.SetActive(true);
+
+    }
+    private void DeactivateLobbyFullWarning()
+    {
+
+        LobbyFull.SetActive(false);
+
+
+    }
     public void UpdateLifeUI(int hitpoints)
     {
         switch (hitpoints)
@@ -206,8 +244,13 @@ public class UIManager : MonoBehaviour
         //ActivateInGameHUD();
         //StartSelectorPlayer();
     }
+    private void DisconectClient()
+    {
+        NetworkManager.Singleton.Shutdown();
+    }
     private void StartServerIP()
     {
+
         ActivateServer();
     }
 
@@ -257,9 +300,47 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
+    public void setNoneOnLobby(int idxCell)
+    {
+
+
+        switch (idxCell - 1)
+        {
+            case 0:
+                GameObject namePlayer = player1.transform.GetChild(0).gameObject;
+                GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
+                namePlayer.GetComponent<Text>().text = "Waiting";
+                imagePlayer.GetComponent<Image>().sprite = null;
+                break;
+            case 1:
+                GameObject namePlayer2 = player2.transform.GetChild(0).gameObject;
+                GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
+                namePlayer2.GetComponent<Text>().text = "Waiting";
+                imagePlayer2.GetComponent<Image>().sprite = null;
+                break;
+            case 2:
+                GameObject namePlayer3 = player3.transform.GetChild(0).gameObject;
+                GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
+                namePlayer3.GetComponent<Text>().text = "Waiting";
+                imagePlayer3.GetComponent<Image>().sprite = null;
+                break;
+            case 3:
+                GameObject namePlayer4 = player4.transform.GetChild(0).gameObject;
+                GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
+                namePlayer4.GetComponent<Text>().text = "Waiting";
+                imagePlayer4.GetComponent<Image>().sprite = null;
+                break;
+            default:
+                break;
+        }
+    }
     public void activatePlay()
     {
         buttonReady.SetActive(true);
+    }
+    private void CloseWarning()
+    {
+        DeactivateLobbyFullWarning();
     }
     #endregion
 

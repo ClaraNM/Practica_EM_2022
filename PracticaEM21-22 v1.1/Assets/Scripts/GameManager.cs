@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using Cinemachine;
+using UnityEngine.UI;
+
 
 public class GameManager : NetworkBehaviour
 {
@@ -45,25 +46,37 @@ public class GameManager : NetworkBehaviour
     {
 
     }
-
-    private void OnClientConnected(ulong clientId)
+    private void OnDisconnectedFromServer()
     {
         
-        
+    }
+    private void OnClientConnected(ulong clientId)
+    {
+
 
         //si un cliente se conecta lo inicializa en uno de los puntos de spawn de manera aleatoria
         if (networkManager.IsServer)
         {
-            int randomNumber = Random.Range(1, 7);
-            if (randomNumber == lastRespawn)
-            {
-                randomNumber = Random.Range(1, 7);
-            }
-            lastRespawn = randomNumber;
-            PlayerSettings playerSettings =new PlayerSettings("prueba",0,randomNumber,clientId);
-            PlayersConnected.Add(clientId, playerSettings);
             currentPlayers.Value++;
-            UpdateLobbyOnClientRpc(currentPlayers.Value);
+            if (currentPlayers.Value > maxPlayers)
+            {
+                var lastClient = networkManager.ConnectedClientsIds[currentPlayers.Value-1];
+                //networkManager.DisconnectClient(lastClient);
+                DisconnectedByServer_ClientRpc(lastClient);
+            }
+            else
+            {
+                int randomNumber = Random.Range(1, 7);
+                if (randomNumber == lastRespawn)
+                {
+                    randomNumber = Random.Range(1, 7);
+                }
+                lastRespawn = randomNumber;
+                PlayerSettings playerSettings = new PlayerSettings(clientId.ToString(), 0, randomNumber, clientId);
+                PlayersConnected.Add(clientId, playerSettings);
+                UpdateLobbyOnClientRpc(currentPlayers.Value);
+            }
+            
             // player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
         }
     }
@@ -72,7 +85,7 @@ public class GameManager : NetworkBehaviour
 
 
 
-        //si un cliente se conecta lo inicializa en uno de los puntos de spawn de manera aleatoria
+        //si un cliente se desconecta se quita de la lista de jugadores en linea
         if (networkManager.IsServer)
         {
           PlayersConnected.Remove(clientId);
@@ -90,18 +103,32 @@ public class GameManager : NetworkBehaviour
         }
     }
     [ClientRpc]
+    void DisconnectedByServer_ClientRpc(ulong lastClientID)
+    {
+        if(networkManager.LocalClientId == lastClientID)
+        {
+            Debug.Log("Se desconecta el ultimo");
+            uiManager.ActivateLobbyFullWarning();
+            NetworkManager.Singleton.Shutdown();
+        }
+
+    }
+
+    [ClientRpc]
     void UpdateLobbyOnClientRpc(int currentPlayerIdx)
     {
-        for (int i = 1; i <= currentPlayerIdx; i++)
+        for (int i = 1; i <= maxPlayers; i++)
         {
-            Debug.Log(currentPlayerIdx);
-            uiManager.setPlayerOnLobby(i, prefab);
+            if (i <= currentPlayerIdx)
+            {
+                uiManager.setPlayerOnLobby(i, prefab);
+            }
+            else
+            {
+                uiManager.setNoneOnLobby(i);
+            }
         }
         
-    }
-    void SpawnPlayers()
-    {
-        StartGameOnServerRpc();
     }
     [ServerRpc(RequireOwnership = false)]
     void StartGameOnServerRpc()

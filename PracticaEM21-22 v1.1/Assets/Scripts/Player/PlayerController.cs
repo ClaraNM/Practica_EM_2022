@@ -53,9 +53,6 @@ public class PlayerController : NetworkBehaviour
         handler.OnMove.AddListener(UpdatePlayerVisualsServerRpc);
         handler.OnJump.AddListener(PerformJumpServerRpc);
         handler.OnMoveFixedUpdate.AddListener(UpdatePlayerPositionServerRpc);
-      //  handler.OnMousePosition.AddListener(UpdateMousePositionServerRpc);
-      //  handler.OnHook.AddListener(PerformHookServerRpc);
-      //  handler.OnHookRender.AddListener(UpdateHookVisualServerRpc);
         FlipSprite.OnValueChanged += OnFlipSpriteValueChanged;
     }
 
@@ -64,9 +61,6 @@ public class PlayerController : NetworkBehaviour
         handler.OnMove.RemoveListener(UpdatePlayerVisualsServerRpc);
         handler.OnJump.RemoveListener(PerformJumpServerRpc);
         handler.OnMoveFixedUpdate.RemoveListener(UpdatePlayerPositionServerRpc);
-       // handler.OnMousePosition.RemoveListener(UpdateMousePositionServerRpc);
-       // handler.OnHook.RemoveListener(PerformHookServerRpc);
-      //  handler.OnHookRender.RemoveListener(UpdateHookVisualServerRpc);
         FlipSprite.OnValueChanged -= OnFlipSpriteValueChanged;
     }
 
@@ -133,8 +127,6 @@ public class PlayerController : NetworkBehaviour
             rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
             
             _jumpsLeft--;
-
-        
         
     }
 
@@ -153,8 +145,6 @@ public class PlayerController : NetworkBehaviour
             {
                 rb.velocity = new Vector2(input.x * speed , rb.velocity.y);
             }
-        
-        
 
     }
 

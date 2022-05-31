@@ -37,12 +37,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button buttonPlay;
     [SerializeField] private Button buttonBackSelector;
 
-    [Header("Server HUD")]
-    [SerializeField] private GameObject ServerHUD;
-    [SerializeField] private InputField inputFieldIP;
-    [SerializeField] private Button buttonServerPlay;
-    [SerializeField] private Button buttonBackServer;
-
     [Header("Lobby")]
     [SerializeField] private GameObject Lobby;
     [SerializeField] private GameObject player1;
@@ -74,8 +68,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        buttonServer.onClick.AddListener(() => StartServerIP());
-        buttonBackServer.onClick.AddListener(() => ActivateMainMenu());
         buttonBackSelector.onClick.AddListener(() => ActivateMainMenu());
         buttonExit.onClick.AddListener(() => StartExit());
         buttonClient.onClick.AddListener(() => StartSelectorPlayer());
@@ -103,7 +95,6 @@ public class UIManager : MonoBehaviour
         mainMenu.SetActive(true);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(false);
@@ -114,31 +105,18 @@ public class UIManager : MonoBehaviour
         mainMenu.SetActive(false);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(true);
-        ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
         Lobby.SetActive(false);
         deadSignHUD.SetActive(false);
 
     }
 
-    private void ActivateServer()
-    {
-        mainMenu.SetActive(false);
-        inGameHUD.SetActive(false);
-        SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(true);
-        LobbyFull.SetActive(false);
-        deadSignHUD.SetActive(false);
-        Lobby.SetActive(false);
-
-    }
     public void ActivateInGameHUD()
     {
         mainMenu.SetActive(false);
         Lobby.SetActive(false);
         inGameHUD.SetActive(true);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(false);
 
@@ -147,7 +125,6 @@ public class UIManager : MonoBehaviour
     {
         mainMenu.SetActive(false);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         inGameHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
@@ -160,7 +137,6 @@ public class UIManager : MonoBehaviour
         Lobby.SetActive(true);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(false);
 
@@ -170,7 +146,6 @@ public class UIManager : MonoBehaviour
         mainMenu.SetActive(false);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(true);
-        ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(true);
         deadSignHUD.SetActive(false);
@@ -181,7 +156,6 @@ public class UIManager : MonoBehaviour
         mainMenu.SetActive(false);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(true);
@@ -193,7 +167,6 @@ public class UIManager : MonoBehaviour
         mainMenu.SetActive(true);
         inGameHUD.SetActive(false);
         SelectorTypeHUD.SetActive(false);
-        ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(false);
@@ -257,7 +230,7 @@ public class UIManager : MonoBehaviour
 
     private void StartClient()
     {
-       var ip = inputFieldIP.text;
+       var ip = inputFieldServerIP.text;
         if (!string.IsNullOrEmpty(ip))
         {
             transport.SetConnectionData(ip, port);
@@ -268,11 +241,6 @@ public class UIManager : MonoBehaviour
     {
         NetworkManager.Singleton.Shutdown();
     }
-    private void StartServerIP()
-    {
-        ActivateServer();
-    }
-
     private void StartServer()
     {
         NetworkManager.Singleton.StartServer();

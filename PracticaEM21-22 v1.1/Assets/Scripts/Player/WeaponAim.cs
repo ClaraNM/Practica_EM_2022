@@ -54,6 +54,7 @@ public class WeaponAim : NetworkBehaviour
 
     }
     #endregion
+
     #region ServerRPC
     //Tanto la posicion del puntero como la orientación del arma han de pasarse como mensajes para que lo pueda actualizar
     //También se ha añadido el componente networkTransform a los objetos CrossHair y Weapon del prefab Player

@@ -4,18 +4,13 @@ using UnityEngine;
 public class Bullet : NetworkBehaviour {
 
     #region Variables
-
-
     public ulong owner;
-
     #endregion
 
     #region Métodos
-
     private void OnTriggerEnter2D(Collider2D collision) {
 
         //Si es el servidor, este comprueba si la bala ha colisionado con otro jugador o con plataformas
-
         if (IsServer) {
 
             if (collision.gameObject.tag == "Platform") {
@@ -32,13 +27,9 @@ public class Bullet : NetworkBehaviour {
 
             }
 
-
-
-
         }
 
     }
-
 
     public void DestruirBalas() {
 
@@ -46,6 +37,5 @@ public class Bullet : NetworkBehaviour {
         GetComponent<NetworkObject>().Despawn();
 
     }
-
     #endregion
 }

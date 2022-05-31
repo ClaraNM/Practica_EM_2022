@@ -7,19 +7,21 @@ using Unity.Collections;
 
 public class GameManager : NetworkBehaviour
 {
-
+    #region Variables
     [SerializeField] NetworkManager networkManager;
     [SerializeField] GameObject [] playerPrefabs;
     [SerializeField] UIManager uiManager;
-     GameObject[] respawns;
-   public NetworkVariable<bool> canStart = new NetworkVariable<bool>();
+    GameObject[] respawns;
+    public NetworkVariable<bool> canStart = new NetworkVariable<bool>();
     int lastRespawn;
     int maxPlayers=4;
     int minPlayers = 2;
     int deaths = 0;
     Dictionary<ulong,PlayerSettings> PlayersConnected = new Dictionary<ulong, PlayerSettings>();
     public NetworkVariable<int> currentPlayers = new NetworkVariable<int>();
+    #endregion
 
+    #region CallBacks
     private void Awake()
     {
         //Busca los puntos de respawn que hay en el mapa
@@ -34,7 +36,6 @@ public class GameManager : NetworkBehaviour
         uiManager.OnPlayerDead.AddListener(OnDeadSignClientRpc);
         currentPlayers.OnValueChanged += OnStateChanged;
 
-
         canStart.Value = false;
     }
 
@@ -47,24 +48,19 @@ public class GameManager : NetworkBehaviour
         uiManager.OnStartGame.RemoveListener(StartGameOnServerRpc);
         uiManager.OnPlayerDead.AddListener(OnDeadSignClientRpc);
 
-
     }
+    #endregion
+
+    #region State Client
     private void OnServerReady()
     {
 
     }
-    private void OnDisconnectedFromServer()
-    {
-        
-    }
     private void OnClientConnected(ulong clientId)
     {
-        Debug.Log(IsClient);
-        Debug.Log(networkManager.IsClient);
-        Debug.Log(IsOwner);
+        // Se envia la skin elegida al servidor
         if (networkManager.IsClient)
         {
-            Debug.Log("Entra en networkManagerisclient");
             SendSkinChoiceToServerRpc(clientId,uiManager.skinChoice);
         }
 
@@ -86,11 +82,9 @@ public class GameManager : NetworkBehaviour
                     randomNumber = Random.Range(1, 7);
                 }
                 lastRespawn = randomNumber;
-
                 
                 PlayerSettings playerSettings = new PlayerSettings("3", 0, randomNumber, clientId);
                 PlayersConnected.Add(clientId, playerSettings);
-
                
                 UpdateLobbyOnClientRpc(currentPlayers.Value);
             }
@@ -99,9 +93,6 @@ public class GameManager : NetworkBehaviour
     }
     private void OnClientDisconnected(ulong clientId)
     {
-
-
-
         //si un cliente se desconecta se quita de la lista de jugadores en linea
         if (networkManager.IsServer)
         {
@@ -112,7 +103,7 @@ public class GameManager : NetworkBehaviour
     }
     void OnStateChanged(int previous, int current)
     {
-        
+        // Se cuenta la cantidad maxima de jugador en el lobby que es 4 y el minimo para jugar que es 2
         if (current>=minPlayers && current <=maxPlayers)
         {
             canStart.Value = true;
@@ -123,7 +114,10 @@ public class GameManager : NetworkBehaviour
             canStart.Value=false;
         }
     }
+    #endregion
 
+    #region ClientRPC
+    // Se envia si se ha desconectado algun jugador
     [ClientRpc]
     void DisconnectedByServer_ClientRpc(ulong lastClientID)
     {
@@ -134,8 +128,8 @@ public class GameManager : NetworkBehaviour
         }
 
     }
-    
 
+    // Se envia la actualizacion del lobby
     [ClientRpc]
     void UpdateLobbyOnClientRpc(int currentPlayerIdx)
     {
@@ -153,7 +147,34 @@ public class GameManager : NetworkBehaviour
         
     }
 
+    // Se envia las muertes de los jugadores
+    [ClientRpc]
+    void OnDeadSignClientRpc(ulong clientTarget)
+    {
+        if (clientTarget == networkManager.LocalClientId)
+        {
+            uiManager.ActivateDeadSign();
+            CountDeathsServerRpc();
+        }
+    }
 
+    // Se envia el estado iniciado del cliente
+    [ClientRpc]
+    void StartGameOnClientRpc()
+    {
+        uiManager.ActivateInGameHUD();
+    }
+
+    // Se envia el mensaje de muerte del jugador
+    [ClientRpc]
+    void GameEndedClientRpc()
+    {
+        uiManager.DeactivateDeadSign();
+    }
+    #endregion
+
+    #region ServerRPC
+    // Los ajustes del personaje se recibe al servidor y se inicia el server
     [ServerRpc(RequireOwnership = false)]
     void StartGameOnServerRpc()
     {
@@ -162,25 +183,13 @@ public class GameManager : NetworkBehaviour
         {
             var client_id = item.Key;
             var plyrStt = item.Value;
-            var player = Instantiate(playerPrefabs[plyrStt.skin], respawns[plyrStt.respawnID].transform);     
+            var player = Instantiate(playerPrefabs[plyrStt.skin], respawns[plyrStt.respawnID].transform);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(client_id);
         }
         StartGameOnClientRpc();
     }
-    [ClientRpc]
-    void OnDeadSignClientRpc(ulong clientTarget)
-    {
-         if(clientTarget == networkManager.LocalClientId)
-        {
-            uiManager.ActivateDeadSign();
-            CountDeathsServerRpc();
-        }
-    }
-    [ClientRpc]
-    void StartGameOnClientRpc()
-    {
-        uiManager.ActivateInGameHUD();
-    }
+
+    // Se recibe la cantida de muertes
     [ServerRpc(RequireOwnership =false)]
     void CountDeathsServerRpc()
     {
@@ -195,18 +204,18 @@ public class GameManager : NetworkBehaviour
             }
         }
     }
+
+    // Se registra la skin elegida
     [ServerRpc(RequireOwnership =false)]
     void SendSkinChoiceToServerRpc(ulong client, int skinChoosen)
     {
         PlayersConnected[client].skin = skinChoosen;
     }
-    [ClientRpc]
-    void GameEndedClientRpc()
-    {
-        uiManager.DeactivateDeadSign();
-    }
+    #endregion
+
 }
- class PlayerSettings
+# region Player Settings
+class PlayerSettings
 {
     public string name;
     public int skin;
@@ -222,3 +231,4 @@ public class GameManager : NetworkBehaviour
     }
     
 }
+#endregion

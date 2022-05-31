@@ -256,6 +256,7 @@ public class UIManager : MonoBehaviour
 
     #region Netcode Related Methods
 
+    //Activa la interfaz del cliente cuya primera pantalla es la etapa de seleccion de nombre y personaje
     private void StartSelectorPlayer()
     {
         ActivateClient();
@@ -270,11 +271,14 @@ public class UIManager : MonoBehaviour
         }
         NetworkManager.Singleton.StartClient();
     }
+
+    //El cliente se desconecta del servidor
     private void DisconectClient()
     {
         NetworkManager.Singleton.Shutdown();
     }
 
+    //Activa la interfaz del servidor que consiste de un hueco para rellenar con la ip y un boton para levantar el servidor
     private void StartServerIP()
     {
 
@@ -291,11 +295,16 @@ public class UIManager : MonoBehaviour
         NetworkManager.Singleton.StartServer();
         ActivateModeViewer();
     }
+
+    //Cerrar la aplicación directamente
     private void StartExit() { Application.Quit(); }
+
+    //Llamada a un UnityEvent que provoca que los listeners que están en el GameManager ejecuten el comienze de partida simultaneo en todos los clientes
     private void StartGame()
     {
        OnStartGame?.Invoke();
     }
+    //Invoca el evento que le comunica al servidor que un jugador ha muerto, el parámetro que pasa es la id del cliente muerto para que se sepa qué jugador concreto es
     public void PlayerDead(ulong clientTarget)
     {
         OnPlayerDead?.Invoke(clientTarget);
@@ -303,7 +312,7 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region Lobby
-    //Si el jugador esta esperando en el lobby sale un mensaje de "Jugador Listo"
+    //Recibe el indice para ver qué hueco del lobby rellenar con el jugador
     public void setPlayerOnLobby(int idxPlayer)
     {
 
@@ -329,7 +338,7 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
-    //Si NO hay jugadores en el lobby aparece un mensaje de "Waiting"
+    //Rellena el hueco del lobby con un mensaje que indica que no hay un jugador ocupando ese hueco
     public void setNoneOnLobby(int idxCell)
     {
         switch (idxCell)
@@ -354,7 +363,7 @@ public class UIManager : MonoBehaviour
                 break;
         }
     }
-    // Se inicia la partida
+    // Aparece en pantalla el botón, previamente oculto, que permite dar comienzo a la partida
     public void activatePlay()
     {
         buttonReady.SetActive(true);

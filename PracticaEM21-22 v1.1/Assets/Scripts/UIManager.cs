@@ -13,11 +13,12 @@ public class UIManager : MonoBehaviour
 
     public static UIManager Instance;
     public UnityEvent OnStartGame;
-
+    public UnityEvent<ulong> OnPlayerDead;
+    Player player;
     [SerializeField] NetworkManager networkManager;
     UnityTransport transport;
     readonly ushort port = 7777;
-
+    public int skinChoice = 0;
     [SerializeField] Sprite[] hearts = new Sprite[3];
 
     [Header("Main Menu")]
@@ -59,6 +60,7 @@ public class UIManager : MonoBehaviour
 
     [Header("In-Game HUD")]
     [SerializeField] private GameObject inGameHUD;
+    [SerializeField] private GameObject deadSignHUD;
 
 
 
@@ -89,7 +91,13 @@ public class UIManager : MonoBehaviour
         buttonExitLobby.onClick.AddListener(() => StartSelectorPlayer());
         buttonExitLobby.onClick.AddListener(() => DisconectClient());
         buttonCloseWarning.onClick.AddListener(() => CloseWarning());
+        buttonType.onClick.AddListener(()=>ChooseGreenCH());
+        buttonType2.onClick.AddListener(() => ChooseBlueCH());
+        buttonType3.onClick.AddListener(() => ChoosePinkCH());
+        buttonType4.onClick.AddListener(() => ChooseYellowCH());
         buttonReady.GetComponent<Button>().onClick.AddListener(() => StartGame());
+      //  player.OnDead.AddListener(()=> ActivateDeadSign());
+
         ActivateMainMenu();
     }
 
@@ -105,6 +113,7 @@ public class UIManager : MonoBehaviour
         ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
+        deadSignHUD.SetActive(false);
 
     }
     private void ActivateClient()
@@ -115,6 +124,7 @@ public class UIManager : MonoBehaviour
         ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
         Lobby.SetActive(false);
+        deadSignHUD.SetActive(false);
 
     }
 
@@ -125,7 +135,7 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(true);
         LobbyFull.SetActive(false);
-
+        deadSignHUD.SetActive(false);
         Lobby.SetActive(false);
 
     }
@@ -137,6 +147,7 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
+        deadSignHUD.SetActive(false);
 
         // for test purposes
         //UpdateLifeUI(Random.Range(1, 6));
@@ -149,7 +160,7 @@ public class UIManager : MonoBehaviour
         inGameHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(false);
-
+        deadSignHUD.SetActive(false);
 
     }
     private void ActivateLobby()
@@ -160,6 +171,7 @@ public class UIManager : MonoBehaviour
         SelectorTypeHUD.SetActive(false);
         ServerHUD.SetActive(false);
         LobbyFull.SetActive(false);
+        deadSignHUD.SetActive(false);
 
     }
     public void ActivateLobbyFullWarning()
@@ -170,6 +182,30 @@ public class UIManager : MonoBehaviour
         ServerHUD.SetActive(false);
         Lobby.SetActive(false);
         LobbyFull.SetActive(true);
+        deadSignHUD.SetActive(false);
+
+    }
+    public void ActivateDeadSign()
+    {
+        mainMenu.SetActive(false);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+        Lobby.SetActive(false);
+        LobbyFull.SetActive(false);
+        deadSignHUD.SetActive(true);
+
+    }
+    public void DeactivateDeadSign()
+    {
+        DisconectClient();
+        mainMenu.SetActive(true);
+        inGameHUD.SetActive(false);
+        SelectorTypeHUD.SetActive(false);
+        ServerHUD.SetActive(false);
+        Lobby.SetActive(false);
+        LobbyFull.SetActive(false);
+        deadSignHUD.SetActive(false);
 
     }
     private void DeactivateLobbyFullWarning()
@@ -179,6 +215,7 @@ public class UIManager : MonoBehaviour
 
 
     }
+
     public void UpdateLifeUI(int hitpoints)
     {
         switch (hitpoints)
@@ -265,37 +302,40 @@ public class UIManager : MonoBehaviour
     {
        OnStartGame?.Invoke();
     }
-
-   public void setPlayerOnLobby(int idxPlayer, GameObject player)
+    public void PlayerDead(ulong clientTarget)
     {
-        Text name_Player = player.transform.GetChild(2).gameObject.transform.GetChild(0).GetComponent<Text>();
-        SpriteRenderer sprite_Player = player.GetComponent<SpriteRenderer>();
+        OnPlayerDead?.Invoke(clientTarget);
+    }
+    public void setPlayerOnLobby(int idxPlayer)
+    {
+       // Text name_Player = player.transform.GetChild(2).gameObject.transform.GetChild(0).GetComponent<Text>();
+      //  SpriteRenderer sprite_Player = player.GetComponent<SpriteRenderer>();
 
-        switch (idxPlayer-1)
+        switch (idxPlayer)
         {
             case 0:
-                GameObject namePlayer = player1.transform.GetChild(0).gameObject;
-                GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
-                namePlayer.GetComponent<Text>().text = name_Player.text;
-                imagePlayer.GetComponent<Image>().sprite=sprite_Player.sprite;
+                GameObject namePlayer = player1.transform.GetChild(1).gameObject;
+              //  GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
+                namePlayer.GetComponent<Text>().text = "Jugador Listo";
+                //imagePlayer.GetComponent<Image>().sprite=sprite_Player.sprite;
                 break;
             case 1:
-                GameObject namePlayer2 = player2.transform.GetChild(0).gameObject;
-                GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
-                namePlayer2.GetComponent<Text>().text = name_Player.text;
-                imagePlayer2.GetComponent<Image>().sprite = sprite_Player.sprite;
+                GameObject namePlayer2 = player2.transform.GetChild(1).gameObject;
+               // GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
+                namePlayer2.GetComponent<Text>().text = "Jugador Listo";
+               // imagePlayer2.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             case 2:
-                GameObject namePlayer3 = player3.transform.GetChild(0).gameObject;
-                GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
-                namePlayer3.GetComponent<Text>().text = name_Player.text;
-                imagePlayer3.GetComponent<Image>().sprite = sprite_Player.sprite;
+                GameObject namePlayer3 = player3.transform.GetChild(1).gameObject;
+              //  GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
+                namePlayer3.GetComponent<Text>().text = "Jugador Listo";
+              //  imagePlayer3.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             case 3:
-                GameObject namePlayer4 = player4.transform.GetChild(0).gameObject;
-                GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
-                namePlayer4.GetComponent<Text>().text = name_Player.text;
-                imagePlayer4.GetComponent<Image>().sprite = sprite_Player.sprite;
+                GameObject namePlayer4 = player4.transform.GetChild(1).gameObject;
+             //   GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
+                namePlayer4.GetComponent<Text>().text = "Jugador Listo";
+             //   imagePlayer4.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             default:
                 break;
@@ -305,31 +345,31 @@ public class UIManager : MonoBehaviour
     {
 
 
-        switch (idxCell - 1)
+        switch (idxCell)
         {
             case 0:
-                GameObject namePlayer = player1.transform.GetChild(0).gameObject;
-                GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
+                GameObject namePlayer = player1.transform.GetChild(1).gameObject;
+              //  GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
                 namePlayer.GetComponent<Text>().text = "Waiting";
-                imagePlayer.GetComponent<Image>().sprite = null;
+              //  imagePlayer.GetComponent<Image>().sprite = null;
                 break;
             case 1:
-                GameObject namePlayer2 = player2.transform.GetChild(0).gameObject;
-                GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
+                GameObject namePlayer2 = player2.transform.GetChild(1).gameObject;
+              //  GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
                 namePlayer2.GetComponent<Text>().text = "Waiting";
-                imagePlayer2.GetComponent<Image>().sprite = null;
+             //   imagePlayer2.GetComponent<Image>().sprite = null;
                 break;
             case 2:
-                GameObject namePlayer3 = player3.transform.GetChild(0).gameObject;
-                GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
+                GameObject namePlayer3 = player3.transform.GetChild(1).gameObject;
+               // GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
                 namePlayer3.GetComponent<Text>().text = "Waiting";
-                imagePlayer3.GetComponent<Image>().sprite = null;
+              //  imagePlayer3.GetComponent<Image>().sprite = null;
                 break;
             case 3:
-                GameObject namePlayer4 = player4.transform.GetChild(0).gameObject;
-                GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
+                GameObject namePlayer4 = player4.transform.GetChild(1).gameObject;
+               // GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
                 namePlayer4.GetComponent<Text>().text = "Waiting";
-                imagePlayer4.GetComponent<Image>().sprite = null;
+              //  imagePlayer4.GetComponent<Image>().sprite = null;
                 break;
             default:
                 break;
@@ -342,6 +382,25 @@ public class UIManager : MonoBehaviour
     private void CloseWarning()
     {
         DeactivateLobbyFullWarning();
+    }
+    private void ChooseGreenCH()
+    {
+        skinChoice = 0;
+    }
+    private void ChooseBlueCH()
+    {
+        skinChoice = 1;
+
+    }
+    private void ChoosePinkCH()
+    {
+        skinChoice = 2;
+
+    }
+    private void ChooseYellowCH()
+    {
+        skinChoice = 3;
+
     }
     #endregion
 

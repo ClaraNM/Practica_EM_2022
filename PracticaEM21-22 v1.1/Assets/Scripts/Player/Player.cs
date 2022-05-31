@@ -4,7 +4,7 @@ using UnityEngine;
 using Cinemachine;
 using Unity.Netcode;
 using Unity.Collections; //Para poder utilizar FixedString64Bytes, ya que networkVariable no permite usar string
-using UnityEngine.UI; // Para poder usar String de la UI
+using UnityEngine.UI; //Para poder usar String de la UI
 using UnityEngine.Events;
 
 public class Player : NetworkBehaviour
@@ -18,7 +18,6 @@ public class Player : NetworkBehaviour
     public Text textoEnCabeza; // Variable para conectar con el asset. En Unity enlazar el texto de la cabeza del personaje con esta variable.
     private GameObject[] respawns;
 
-
     //Vida
     public int NumHealth;
     public UnityEvent OnDead;
@@ -30,15 +29,11 @@ public class Player : NetworkBehaviour
     #endregion
 
     #region Unity Event Functions
-
     private void Awake()
     {
-        // NetworkManager.OnClientConnectedCallback += ConfigurePlayer;
-        //ConfigurePlayer(this.OwnerClientId);
         respawns = GameObject.FindGameObjectsWithTag("Respawn");
         State = new NetworkVariable<PlayerState>();
         Nombre = new NetworkVariable<FixedString32Bytes>(); //Inicializamos el nombre
-
 
         //Vida
         Vidas = new NetworkVariable<int>(NumHealth);
@@ -52,25 +47,22 @@ public class Player : NetworkBehaviour
     {
         // https://docs-multiplayer.unity3d.com/netcode/current/api/Unity.Netcode.NetworkVariable-1.OnValueChangedDelegate
         State.OnValueChanged += OnPlayerStateValueChanged;
+        Nombre.OnValueChanged += OnPlayerNombreValueChanged;
 
         //Actualización de la vida
         Vidas.OnValueChanged += UpdateLives;
-
-        Nombre.OnValueChanged += OnPlayerNombreValueChanged; //
     }
 
     private void OnDisable()
     {
         // https://docs-multiplayer.unity3d.com/netcode/current/api/Unity.Netcode.NetworkVariable-1.OnValueChangedDelegate
         State.OnValueChanged -= OnPlayerStateValueChanged;
+        Nombre.OnValueChanged -= OnPlayerNombreValueChanged;
 
         Vidas.OnValueChanged -= UpdateLives;
-
-        Nombre.OnValueChanged -= OnPlayerNombreValueChanged; //
     }
     void Dead()
     {
-        //   OnDead?.Invoke();
         UIManager.Instance.PlayerDead(OwnerClientId);
     }
     #endregion
@@ -98,8 +90,6 @@ public class Player : NetworkBehaviour
 
     void ConfigurePlayer()
     {
-       
-       // PlayerRespawnPositionServerRpc();
         UpdatePlayerStateServerRpc(PlayerState.Grounded);
     }
 
@@ -129,16 +119,20 @@ public class Player : NetworkBehaviour
     {
         State.Value = state;
     }
+
+    // Se registra los respawns y se posicionan de forma aleatoria
     [ServerRpc]
     public void PlayerRespawnPositionServerRpc()
     {
         int randomNumber = Random.Range(1, 10);
         transform.position = respawns[randomNumber].transform.position;
     }
+
+    // Se registra el nombre del jugador
     [ServerRpc]
-    public void UpdatePlayerNameServerRpc(FixedString32Bytes nombreActual) //
+    public void UpdatePlayerNameServerRpc(FixedString32Bytes nombreActual)
     {
-        Nombre.Value = nombreActual; //
+        Nombre.Value = nombreActual;
         textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
     }
     #endregion
@@ -153,15 +147,14 @@ public class Player : NetworkBehaviour
         State.Value = current;
     }
 
-    void OnPlayerNombreValueChanged(FixedString32Bytes previous, FixedString32Bytes current) //
+    // Se actualiza el cambio del nombre del jugador
+    void OnPlayerNombreValueChanged(FixedString32Bytes previous, FixedString32Bytes current)
     {
-        Nombre.Value = current; //
-        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
+        Nombre.Value = current;
+        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compartida al asset.
     }
 
-
     //Vida
-
     //Se actualiza la vida
     private void UpdateLives(int anterior, int actual)
     {
@@ -171,7 +164,6 @@ public class Player : NetworkBehaviour
             UIManager.Instance.UpdateLifeUI(NumHealth - actual);
         }
     }
-
 
     //Se calcula la vida restante tras el impacto del disparo
     public void DamageDisparo()
@@ -203,9 +195,6 @@ public class Player : NetworkBehaviour
             else
             {
                 Vidas.Value = leftLives;
-
-                //Aquí va el respawn
-
             }
         }
     }

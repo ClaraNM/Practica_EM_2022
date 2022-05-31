@@ -5,6 +5,7 @@ using Cinemachine;
 using Unity.Netcode;
 using Unity.Collections; //Para poder utilizar FixedString64Bytes, ya que networkVariable no permite usar string
 using UnityEngine.UI; // Para poder usar String de la UI
+using UnityEngine.Events;
 
 public class Player : NetworkBehaviour
 {
@@ -20,7 +21,7 @@ public class Player : NetworkBehaviour
 
     //Vida
     public int NumHealth;
-
+    public UnityEvent OnDead;
     public NetworkVariable<int> Vidas;
     public NetworkVariable<bool> isDead;
 
@@ -67,7 +68,11 @@ public class Player : NetworkBehaviour
 
         Nombre.OnValueChanged -= OnPlayerNombreValueChanged; //
     }
-
+    void Dead()
+    {
+        //   OnDead?.Invoke();
+        UIManager.Instance.PlayerDead(OwnerClientId);
+    }
     #endregion
 
     #region Config Methods
@@ -80,14 +85,15 @@ public class Player : NetworkBehaviour
             ConfigureCamera();
             ConfigureControls();
             UIManager.Instance.UpdateLifeUI(NumHealth - Vidas.Value);
+            string thisName = UIManager.Instance.inputFieldNamePlayer.text.ToString(); //Recogemos el nombre de la UI
+            if (thisName.Length == 0) //Si en la UI no han puesto nombre, le llamamos "Jugador [ID del cliente]"
+            {
+                thisName = $"Jugador {this.OwnerClientId}";
+            }
+            UpdatePlayerNameServerRpc(thisName); // hacer metodo antes de esto para comprobar que no esta vacio
+            textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
         }
-        string thisName = UIManager.Instance.inputFieldNamePlayer.text.ToString(); //Recogemos el nombre de la UI
-        if (thisName.Length == 0) //Si en la UI no han puesto nombre, le llamamos "Jugador [ID del cliente]"
-        {
-            thisName = $"Jugador {this.OwnerClientId}";
-        }
-        UpdatePlayerNameServerRpc(thisName); // hacer metodo antes de esto para comprobar que no esta vacio
-        textoEnCabeza.text = Nombre.Value.ToString(); // Asignamos el nombre de la variable compratida al asset.
+      
     }
 
     void ConfigurePlayer()
@@ -189,6 +195,7 @@ public class Player : NetworkBehaviour
                 {
                     //Muerte del personaje
                     isDead.Value = true;
+                    Dead();
                     player.GetComponent<NetworkObject>().Despawn();
                 }
 

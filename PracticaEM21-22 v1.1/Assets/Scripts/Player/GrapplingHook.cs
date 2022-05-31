@@ -16,7 +16,7 @@ public class GrapplingHook : NetworkBehaviour
     LayerMask layer;
     Player player;
 
-    readonly float climbSpeed = 2f;
+    readonly float climbSpeed = 3f;
     readonly float swingForce = 80f;
 
     Rigidbody2D rb;

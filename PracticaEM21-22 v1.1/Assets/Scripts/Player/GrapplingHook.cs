@@ -183,7 +183,6 @@ public class GrapplingHook : NetworkBehaviour
 
     #region Methods
 
-
     void UpdateAnchor(Vector2 anchor)
     {
         rope.connectedAnchor = anchor;
@@ -191,6 +190,7 @@ public class GrapplingHook : NetworkBehaviour
         ropeRenderer.SetPosition(1, anchor);
         UpdateAnchorClientRpc(anchor);
     }
+
     void UpdateRope()
     {
         ropeRenderer.SetPosition(0, playerTransform.position);
@@ -208,6 +208,7 @@ public class GrapplingHook : NetworkBehaviour
         rope.enabled = false;
         ropeRenderer.enabled = false;
     }
+
     void ClimbRope(float input)
     {
         ropeDistance.Value = (input) * climbSpeed * Time.deltaTime;
@@ -217,7 +218,6 @@ public class GrapplingHook : NetworkBehaviour
     {
         rope.distance -= current;
     }
-
 
     #endregion
 }

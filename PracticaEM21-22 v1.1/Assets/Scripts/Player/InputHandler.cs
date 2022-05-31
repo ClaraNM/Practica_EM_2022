@@ -89,7 +89,6 @@ public class InputHandler : NetworkBehaviour
     private void FixedUpdate()
     {
         MoveFixedUpdate(CachedMoveInput);
-
     }
 
     #endregion
@@ -121,6 +120,7 @@ public class InputHandler : NetworkBehaviour
         OnHookRender?.Invoke(input);
     }
 
+    // Disparo
     void Fire()
     {
         OnFire?.Invoke();

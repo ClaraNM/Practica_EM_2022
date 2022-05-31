@@ -80,6 +80,8 @@ public class GrapplingHook : NetworkBehaviour
     #region Netcode RPC
 
     #region ServerRPC
+    //Toda la ejecución de físicas y movimientos se hace en el servidor, y desde ahí se mandan mensajes a los clientes para que actualicen
+    //los elementos que no se actualicen automaticamente por no tener NetworkTransform o ser NetworkObjets, como por ejemplo la cuerda.
 
     // https://docs-multiplayer.unity3d.com/netcode/current/advanced-topics/message-system/serverrpc
     [ServerRpc]
@@ -111,6 +113,7 @@ public class GrapplingHook : NetworkBehaviour
     [ServerRpc]
     void JumpPerformedServerRpc()
     {
+        //Se quita la cuerda tanto del servidor como del cliente
         RemoveRope();
         RemoveRopeClientRpc();
         rope.enabled = false;

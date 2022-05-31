@@ -50,7 +50,7 @@ public class GameManager : NetworkBehaviour
     }
     #endregion
 
-    #region State Client
+    #region Server/Client Connection
     private void OnServerReady()
     {
 
@@ -58,16 +58,17 @@ public class GameManager : NetworkBehaviour
 
     private void OnClientConnected(ulong clientId)
     {
-        // Se envia la skin elegida al servidor
+        // Se envia la skin elegida por el cliente al servidor
         if (networkManager.IsClient)
         {
             SendSkinChoiceToServerRpc(clientId,uiManager.skinChoice);
         }
 
-        //si un cliente se conecta lo inicializa en uno de los puntos de spawn de manera aleatoria
         if (networkManager.IsServer)
         {
             currentPlayers.Value++;
+
+            //Si se conecta un cliente nuevo y sobrepasa el limite de jugadores se le echa.
             if (currentPlayers.Value > maxPlayers)
             {
                 var lastClient = networkManager.ConnectedClientsIds[currentPlayers.Value-1];
@@ -75,7 +76,7 @@ public class GameManager : NetworkBehaviour
             }
             else
             {
-                //Posicion de spawn del jugador
+                //Cuando el cliente se conecta, se le atribuye uno de los puntos de spawn de manera aleatoria
                 int randomNumber = Random.Range(1, 7);
                 if (randomNumber == lastRespawn)
                 {
@@ -83,7 +84,10 @@ public class GameManager : NetworkBehaviour
                 }
                 lastRespawn = randomNumber;
                 
+                //Los datos para poder instanciar al jugador se almacenan en PlayerSettings
                 PlayerSettings playerSettings = new PlayerSettings("3", 0, randomNumber, clientId);
+
+                //El servidor almacena los jugadores que se han conectado
                 PlayersConnected.Add(clientId, playerSettings);
 
                 UpdateLobbyOnClientRpc(currentPlayers.Value);
@@ -93,7 +97,7 @@ public class GameManager : NetworkBehaviour
 
     private void OnClientDisconnected(ulong clientId)
     {
-        //si un cliente se desconecta se quita de la lista de jugadores en linea
+        //si un cliente se desconecta se quita de la lista de jugadores en linea y se actualiza el lobby para borrarlo
         if (networkManager.IsServer)
         {
           PlayersConnected.Remove(clientId);
@@ -118,7 +122,7 @@ public class GameManager : NetworkBehaviour
     #endregion
 
     #region ClientRPC
-    // Se envia si se ha desconectado algún jugador
+    // El servidor echa al cliente porque ha sobrepasado el limite, y le salta un aviso desde el uiManager
     [ClientRpc]
     void DisconnectedByServer_ClientRpc(ulong lastClientID)
     {
@@ -129,7 +133,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    // Se envia la actualizacion del lobby
+    // Se envia la actualizacion del lobby con la cantidad de personas conectadas
     [ClientRpc]
     void UpdateLobbyOnClientRpc(int currentPlayerIdx)
     {
@@ -147,25 +151,26 @@ public class GameManager : NetworkBehaviour
         
     }
 
-    // Se envia las muertes de los jugadores
+    // El servidor comunica al jugar muerto que le aparezca el mensaje de muerte
     [ClientRpc]
     void OnDeadSignClientRpc(ulong clientTarget)
     {
         if (clientTarget == networkManager.LocalClientId)
         {
             uiManager.ActivateDeadSign();
+            //Una vez confirmada la muerte, desde el cliente se envá un mensaje al servidor confirmando la muerte para que la cuente.
             CountDeathsServerRpc();
         }
     }
 
-    // Se envia el estado iniciado del cliente
+    // Se comunica a los clientes que usen la interfaz de partida
     [ClientRpc]
     void StartGameOnClientRpc()
     {
         uiManager.ActivateInGameHUD();
     }
 
-    // Se envia el mensaje de muerte del jugador
+    // Se comunica a los clientes que la partida ya ha terminado para que en ellos se actualice la Uçinterfaz
     [ClientRpc]
     void GameEndedClientRpc()
     {
@@ -174,7 +179,7 @@ public class GameManager : NetworkBehaviour
     #endregion
 
     #region ServerRPC
-    // Los ajustes del personaje se recibe al servidor y se inicia el server
+    // El servidor recorre el diccionario que almacena a los jugadores y los instancia como Player Object
     [ServerRpc(RequireOwnership = false)]
     void StartGameOnServerRpc()
     {
@@ -189,7 +194,7 @@ public class GameManager : NetworkBehaviour
         StartGameOnClientRpc();
     }
 
-    // Se recibe la cantida de muertes
+    //El servidor actualiza su conteo de muertes, si solo queda un jugador vivo, entonces la partida acaba y se lo comunica a los clientes
     [ServerRpc(RequireOwnership = false)]
     void CountDeathsServerRpc()
     {
@@ -205,7 +210,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    // Se registra la skin elegida
+    // Se registra la skin elegida por un cliente en el diccionario de jugadores del servidor
     [ServerRpc(RequireOwnership =false)]
     void SendSkinChoiceToServerRpc(ulong client, int skinChoosen)
     {
@@ -214,6 +219,9 @@ public class GameManager : NetworkBehaviour
     #endregion
 
 }
+
+
+//Clase que almacena las preferencias del jugador sobre su personaje
  class PlayerSettings
 {
     public string name;

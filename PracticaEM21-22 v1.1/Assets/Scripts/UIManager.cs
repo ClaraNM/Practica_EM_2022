@@ -8,7 +8,6 @@ using UnityEngine.Events;
 
 public class UIManager : MonoBehaviour
 {
-
     #region Variables
 
     public static UIManager Instance;
@@ -23,14 +22,13 @@ public class UIManager : MonoBehaviour
 
     [Header("Main Menu")]
     [SerializeField] private GameObject mainMenu;
-  //  [SerializeField] private Button buttonHost;
     [SerializeField] private Button buttonClient;
     [SerializeField] private Button buttonServer;
     [SerializeField] private Button buttonExit;
 
     [Header("Selector Type HUD")]
     [SerializeField] private GameObject SelectorTypeHUD;
-    [SerializeField] public InputField inputFieldNamePlayer; //
+    [SerializeField] public InputField inputFieldNamePlayer;
     [SerializeField] private InputField inputFieldServerIP;
     [SerializeField] private Button buttonType;
     [SerializeField] private Button buttonType2;
@@ -62,8 +60,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject inGameHUD;
     [SerializeField] private GameObject deadSignHUD;
 
-
-
     [SerializeField] RawImage[] heartsUI = new RawImage[3];
 
     #endregion
@@ -78,8 +74,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        //buttonHost.onClick.AddListener(() => StartHost());
-       // buttonClient.onClick.AddListener(() => StartSelectorPlayer());
         buttonServer.onClick.AddListener(() => StartServerIP());
         buttonBackServer.onClick.AddListener(() => ActivateMainMenu());
         buttonBackSelector.onClick.AddListener(() => ActivateMainMenu());
@@ -96,7 +90,6 @@ public class UIManager : MonoBehaviour
         buttonType3.onClick.AddListener(() => ChoosePinkCH());
         buttonType4.onClick.AddListener(() => ChooseYellowCH());
         buttonReady.GetComponent<Button>().onClick.AddListener(() => StartGame());
-      //  player.OnDead.AddListener(()=> ActivateDeadSign());
 
         ActivateMainMenu();
     }
@@ -149,8 +142,6 @@ public class UIManager : MonoBehaviour
         LobbyFull.SetActive(false);
         deadSignHUD.SetActive(false);
 
-        // for test purposes
-        //UpdateLifeUI(Random.Range(1, 6));
     }
     private void ActivateModeViewer()
     {
@@ -208,14 +199,12 @@ public class UIManager : MonoBehaviour
         deadSignHUD.SetActive(false);
 
     }
+    // Advertencia por si el lobby esta lleno
     private void DeactivateLobbyFullWarning()
     {
-
         LobbyFull.SetActive(false);
-
-
     }
-
+    // La actualizacion del sprite de vida cada que se le dispara a un jugador
     public void UpdateLifeUI(int hitpoints)
     {
         switch (hitpoints)
@@ -261,11 +250,6 @@ public class UIManager : MonoBehaviour
 
     #region Netcode Related Methods
 
-    private void StartHost()
-    {
-        NetworkManager.Singleton.StartHost();
-        ActivateInGameHUD();
-    }
     private void StartSelectorPlayer()
     {
         ActivateClient();
@@ -279,8 +263,6 @@ public class UIManager : MonoBehaviour
             transport.SetConnectionData(ip, port);
         }
         NetworkManager.Singleton.StartClient();
-        //ActivateInGameHUD();
-        //StartSelectorPlayer();
     }
     private void DisconectClient()
     {
@@ -288,7 +270,6 @@ public class UIManager : MonoBehaviour
     }
     private void StartServerIP()
     {
-
         ActivateServer();
     }
 
@@ -306,102 +287,89 @@ public class UIManager : MonoBehaviour
     {
         OnPlayerDead?.Invoke(clientTarget);
     }
-    public void setPlayerOnLobby(int idxPlayer)
-    {
-       // Text name_Player = player.transform.GetChild(2).gameObject.transform.GetChild(0).GetComponent<Text>();
-      //  SpriteRenderer sprite_Player = player.GetComponent<SpriteRenderer>();
+    #endregion
 
-        switch (idxPlayer)
+    #region Lobby
+    //Si el jugador esta esperando en el lobby sale un mensaje de "Jugador Listo"
+    public void setPlayerOnLobby(int idxPlayer) 
+    {
+
+        switch (idxPlayer)  
         {
             case 0:
                 GameObject namePlayer = player1.transform.GetChild(1).gameObject;
-              //  GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
                 namePlayer.GetComponent<Text>().text = "Jugador Listo";
-                //imagePlayer.GetComponent<Image>().sprite=sprite_Player.sprite;
                 break;
             case 1:
                 GameObject namePlayer2 = player2.transform.GetChild(1).gameObject;
-               // GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
                 namePlayer2.GetComponent<Text>().text = "Jugador Listo";
-               // imagePlayer2.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             case 2:
                 GameObject namePlayer3 = player3.transform.GetChild(1).gameObject;
-              //  GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
                 namePlayer3.GetComponent<Text>().text = "Jugador Listo";
-              //  imagePlayer3.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             case 3:
                 GameObject namePlayer4 = player4.transform.GetChild(1).gameObject;
-             //   GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
                 namePlayer4.GetComponent<Text>().text = "Jugador Listo";
-             //   imagePlayer4.GetComponent<Image>().sprite = sprite_Player.sprite;
                 break;
             default:
                 break;
         }
     }
+    //Si NO hay jugadores en el lobby aparece un mensaje de "Waiting"
     public void setNoneOnLobby(int idxCell)
     {
-
-
         switch (idxCell)
         {
             case 0:
                 GameObject namePlayer = player1.transform.GetChild(1).gameObject;
-              //  GameObject imagePlayer = player1.transform.GetChild(1).gameObject;
                 namePlayer.GetComponent<Text>().text = "Waiting";
-              //  imagePlayer.GetComponent<Image>().sprite = null;
                 break;
             case 1:
                 GameObject namePlayer2 = player2.transform.GetChild(1).gameObject;
-              //  GameObject imagePlayer2 = player2.transform.GetChild(1).gameObject;
                 namePlayer2.GetComponent<Text>().text = "Waiting";
-             //   imagePlayer2.GetComponent<Image>().sprite = null;
                 break;
             case 2:
                 GameObject namePlayer3 = player3.transform.GetChild(1).gameObject;
-               // GameObject imagePlayer3 = player3.transform.GetChild(1).gameObject;
                 namePlayer3.GetComponent<Text>().text = "Waiting";
-              //  imagePlayer3.GetComponent<Image>().sprite = null;
                 break;
             case 3:
                 GameObject namePlayer4 = player4.transform.GetChild(1).gameObject;
-               // GameObject imagePlayer4 = player4.transform.GetChild(1).gameObject;
                 namePlayer4.GetComponent<Text>().text = "Waiting";
-              //  imagePlayer4.GetComponent<Image>().sprite = null;
                 break;
             default:
                 break;
         }
     }
+    // Se inicia la partida
     public void activatePlay()
     {
         buttonReady.SetActive(true);
     }
+    // Se desactiva la advertencia del lobby lleno
     private void CloseWarning()
     {
         DeactivateLobbyFullWarning();
     }
+    // Escoges la skin del marciano verde
     private void ChooseGreenCH()
     {
         skinChoice = 0;
     }
+    // Escoges la skin del marciano Azul
     private void ChooseBlueCH()
     {
         skinChoice = 1;
-
     }
+    // Escoges la skin del marciano rosa
     private void ChoosePinkCH()
     {
         skinChoice = 2;
-
     }
+    // Escoges la skin del marciano amarillo
     private void ChooseYellowCH()
     {
         skinChoice = 3;
-
     }
     #endregion
-
 }
